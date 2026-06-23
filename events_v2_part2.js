@@ -87,7 +87,7 @@ const EVENTS_V2_PART2 = {
         choices: [
           { text: '主动报名值班', effects: { fishing: -5, performance: 7, happy: -3, social: 5 } },
           { text: '低头假装记笔记', effects: { fishing: 3, performance: 0, happy: 1, social: -1 } },
-          { text: '偷看俞闲反应', effects: { fishing: 2, performance: -1, happy: 3, social: 2 } },
+          { text: '偷看同事反应', effects: { fishing: 2, performance: -1, happy: 3, social: 2 } },
         ],
         triggerMiniGame: null,
       }
@@ -118,7 +118,7 @@ const EVENTS_V2_PART2 = {
     overtime: [
       {
         id: 'd17_o1',
-        text: '七点了，周五的办公室依然灯火通明。你发现俞闲也还在——她正对着一份数据报表眉头紧锁。这是帮忙的好机会，还是赶紧跑路？',
+        text: '七点了，周五的办公室依然灯火通明。你发现同事也还在——正对着一份数据报表眉头紧锁。这是帮忙的好机会，还是赶紧跑路？',
         choices: [
           { text: '过去帮忙', effects: { fishing: -3, performance: 3, happy: 2, social: 7 } },
           { text: '各走各的先撤', effects: { fishing: 3, performance: 0, happy: 2, social: -1 } },
@@ -186,11 +186,11 @@ const EVENTS_V2_PART2 = {
     noon: [
       {
         id: 'd19_n1',
-        text: '中午追剧追到一半，俞闲突然发来消息："明天618备战正式开始，你那边准备得怎么样了？"配了个紧张的表情包。你看了看自己的进度——好像还差亿点点。',
+        text: '中午追剧追到一半，同事突然发来消息："明天618备战正式开始，你那边准备得怎么样了？"配了个紧张的表情包。你看了看自己的进度——好像还差亿点点。',
         choices: [
           { text: '老实回复没准备好', effects: { fishing: 0, performance: 1, happy: -1, social: 4 } },
           { text: '逞强说没问题', effects: { fishing: 0, performance: 0, happy: 0, social: 2 } },
-          { text: '约她一起复习', effects: { fishing: -3, performance: 4, happy: 3, social: 7 } },
+          { text: '约对方一起复习', effects: { fishing: -3, performance: 4, happy: 3, social: 7 } },
         ],
         triggerMiniGame: null,
       }
@@ -282,7 +282,7 @@ const EVENTS_V2_PART2 = {
         choices: [
           { text: '认命接手排查', effects: { fishing: -4, performance: 6, happy: -3, social: 2 } },
           { text: '委婉推回给原作者', effects: { fishing: 2, performance: 0, happy: 1, social: -2 } },
-          { text: '找俞闲一起看', effects: { fishing: -1, performance: 3, happy: 2, social: 5 } },
+          { text: '找同事一起看', effects: { fishing: -1, performance: 3, happy: 2, social: 5 } },
         ],
         triggerMiniGame: null,
       }
@@ -290,7 +290,7 @@ const EVENTS_V2_PART2 = {
     afternoon: [
       {
         id: 'd21_a1',
-        text: '下午代码评审会上，你的PR被资深开发挑出了五个问题。虽然都是小事，但当着全组人的面被指出来，脸还是有点烫。俞闲投来同情的目光。',
+        text: '下午代码评审会上，你的PR被资深开发挑出了五个问题。虽然都是小事，但当着全组人的面被指出来，脸还是有点烫。同事投来同情的目光。',
         choices: [
           { text: '虚心接受马上改', effects: { fishing: -3, performance: 5, happy: -1, social: 3 } },
           { text: '据理力争解释', effects: { fishing: 0, performance: 2, happy: 0, social: -1 } },
@@ -302,9 +302,9 @@ const EVENTS_V2_PART2 = {
     overtime: [
       {
         id: 'd21_o1',
-        text: '加班到八点半，终于把今天的bug全清了。你伸了个懒腰，发现俞闲还在旁边埋头苦干。她的屏幕上是一个复杂的数据看板——618实时监控大屏。',
+        text: '加班到八点半，终于把今天的bug全清了。你伸了个懒腰，发现同事还在旁边埋头苦干。屏幕上是一个复杂的数据看板——618实时监控大屏。',
         choices: [
-          { text: '邀她一起吃宵夜', effects: { fishing: 2, performance: 0, happy: 4, social: 7 } },
+          { text: '邀同事一起吃宵夜', effects: { fishing: 2, performance: 0, happy: 4, social: 7 } },
           { text: '默默收拾走人', effects: { fishing: 2, performance: 0, happy: 1, social: 0 } },
         ],
         triggerMiniGame: null,
@@ -443,10 +443,10 @@ const EVENTS_V2_PART2 = {
     noon: [
       {
         id: 'd24_n1',
-        text: '中午一群人讨论618值班零食采购清单。有人要红牛，有人要泡面，你说要一箱咖啡。俞闲在旁边补了一句"再来点巧克力"，然后对你眨了眨眼。',
+        text: '中午一群人讨论618值班零食采购清单。有人要红牛，有人要泡面，你说要一箱咖啡。同事在旁边补了一句"再来点巧克力"，然后对你眨了眨眼。',
         choices: [
-          { text: '帮她多点巧克力', effects: { fishing: 1, performance: 0, happy: 3, social: 6 } },
-          { text: '问她要什么口味', effects: { fishing: 0, performance: 0, happy: 2, social: 5 } },
+          { text: '帮忙多点巧克力', effects: { fishing: 1, performance: 0, happy: 3, social: 6 } },
+          { text: '问要什么口味', effects: { fishing: 0, performance: 0, happy: 2, social: 5 } },
           { text: '专心吃饭不搭话', effects: { fishing: 0, performance: 0, happy: 0, social: -1 } },
         ],
         triggerMiniGame: null,
@@ -471,7 +471,7 @@ const EVENTS_V2_PART2 = {
         choices: [
           { text: '自测一遍再走', effects: { fishing: -3, performance: 5, happy: 0, social: 0 } },
           { text: '直接提交跑路', effects: { fishing: 4, performance: -2, happy: 4, social: 0 } },
-          { text: '叫上俞闲一起走', effects: { fishing: 1, performance: 0, happy: 3, social: 6 } },
+          { text: '叫上同事一起走', effects: { fishing: 1, performance: 0, happy: 3, social: 6 } },
         ],
         triggerMiniGame: null,
       }
@@ -495,7 +495,7 @@ const EVENTS_V2_PART2 = {
     noon: [
       {
         id: 'd25_n1',
-        text: '周六的公司格外安静，只有618相关的几组人在。你发现公司贴心地准备了免费午餐——虽然只是盒饭，但有种"卖命换盒饭"的荒诞感。俞闲也来了，坐在对面默默吃饭。',
+        text: '周六的公司格外安静，只有618相关的几组人在。你发现公司贴心地准备了免费午餐——虽然只是盒饭，但有种"卖命换盒饭"的荒诞感。同事也来了，坐在对面默默吃饭。',
         choices: [
           { text: '吐槽周末加班', effects: { fishing: 2, performance: 0, happy: 2, social: 4 } },
           { text: '讨论618技术方案', effects: { fishing: -2, performance: 4, happy: 0, social: 3 } },
@@ -511,7 +511,7 @@ const EVENTS_V2_PART2 = {
         choices: [
           { text: '回去好好休息', effects: { fishing: 5, performance: -1, happy: 4, social: 0 } },
           { text: '顺便多做点预案', effects: { fishing: -4, performance: 5, happy: -2, social: 0 } },
-          { text: '约俞闲出去逛逛', effects: { fishing: 3, performance: -1, happy: 5, social: 7 } },
+          { text: '约同事出去逛逛', effects: { fishing: 3, performance: -1, happy: 5, social: 7 } },
         ],
         triggerMiniGame: null,
       }
@@ -536,7 +536,7 @@ const EVENTS_V2_PART2 = {
     noon: [
       {
         id: 'd26_n1',
-        text: '中午在家吃了碗泡面，俞闲发来消息："下午的checklist会议你参加吗？"附带一个猫猫叹气的表情包。看来她也不想去，但又不得不去。同是天涯加班人啊。',
+        text: '中午在家吃了碗泡面，同事发来消息："下午的checklist会议你参加吗？"附带一个猫猫叹气的表情包。看来对方也不想去，但又不得不去。同是天涯加班人啊。',
         choices: [
           { text: '回复一起线上参加', effects: { fishing: -1, performance: 2, happy: 1, social: 5 } },
           { text: '说自己的部分已经OK', effects: { fishing: 2, performance: 1, happy: 1, social: 2 } },
@@ -601,7 +601,7 @@ const EVENTS_V2_PART2 = {
     overtime: [
       {
         id: 'd27_o1',
-        text: '晚上十点，值班排班正式生效。你今晚不用值班，但看着留守的同事们一个个红着眼睛盯屏幕，有种奇怪的内疚感。俞闲发消息："你先回去，明天你的班。"',
+        text: '晚上十点，值班排班正式生效。你今晚不用值班，但看着留守的同事们一个个红着眼睛盯屏幕，有种奇怪的内疚感。同事发消息："你先回去，明天你的班。"',
         choices: [
           { text: '留下来陪值班', effects: { fishing: -5, performance: 4, happy: -2, social: 6 } },
           { text: '听劝先回去休息', effects: { fishing: 3, performance: 1, happy: 2, social: 2 } },
@@ -652,10 +652,10 @@ const EVENTS_V2_PART2 = {
     overtime: [
       {
         id: 'd28_o1',
-        text: '晚上值班开始了。你和另一个实习生盯着监控面板，每隔十分钟刷新一次数据。一切平稳。俞闲发来消息："还顺利吗？我给你带了咖啡放前台了。"',
+        text: '晚上值班开始了。你和另一个实习生盯着监控面板，每隔十分钟刷新一次数据。一切平稳。同事发来消息："还顺利吗？我给你带了咖啡放前台了。"',
         choices: [
           { text: '去拿咖啡顺便回个谢', effects: { fishing: 1, performance: 0, happy: 5, social: 6 } },
-          { text: '回复没事让她早点睡', effects: { fishing: 0, performance: 1, happy: 2, social: 4 } },
+          { text: '回复没事早点睡', effects: { fishing: 0, performance: 1, happy: 2, social: 4 } },
         ],
         triggerMiniGame: null,
       }
@@ -683,7 +683,7 @@ const EVENTS_V2_PART2 = {
         choices: [
           { text: '认真听讲群情激昂', effects: { fishing: -2, performance: 3, happy: 1, social: 3 } },
           { text: '埋头猛吃免费大餐', effects: { fishing: 3, performance: 0, happy: 5, social: 1 } },
-          { text: '和俞闲偷偷吐槽', effects: { fishing: 2, performance: -1, happy: 4, social: 5 } },
+          { text: '和同事偷偷吐槽', effects: { fishing: 2, performance: -1, happy: 4, social: 5 } },
         ],
         triggerMiniGame: null,
       }
@@ -730,7 +730,7 @@ const EVENTS_V2_PART2 = {
     noon: [
       {
         id: 'd30_n1',
-        text: '中午，618战报出炉——销售额破纪录！领导在群里连发三个"好"字，PM激动得语音消息都在颤抖。庆祝的气氛弥漫在每个角落。你和俞闲对视一笑——他们这些实习生也是这场大战的一份子。',
+        text: '中午，618战报出炉——销售额破纪录！领导在群里连发三个"好"字，PM激动得语音消息都在颤抖。庆祝的气氛弥漫在每个角落。你和同事对视一笑——他们这些实习生也是这场大战的一份子。',
         choices: [
           { text: '由衷为团队开心', effects: { fishing: 0, performance: 3, happy: 7, social: 5 } },
           { text: '心里想着加班费', effects: { fishing: 2, performance: 0, happy: 3, social: 0 } },
@@ -742,7 +742,7 @@ const EVENTS_V2_PART2 = {
     afternoon: [
       {
         id: 'd30_a1',
-        text: '下午，618高峰已过，系统趋于平稳。你突然想起——今天也是实习的最后一天。他看着自己的工位：贴满便利贴的显示器、喝了一半的咖啡、和俞闲一起买的桌面摆件。三十天就这样过去了。',
+        text: '下午，618高峰已过，系统趋于平稳。你突然想起——今天也是实习的最后一天。他看着自己的工位：贴满便利贴的显示器、喝了一半的咖啡、和同事一起买的桌面摆件。三十天就这样过去了。',
         choices: [
           { text: '认真写实习总结', effects: { fishing: -3, performance: 6, happy: 2, social: 3 } },
           { text: '找每个人道别', effects: { fishing: 0, performance: 1, happy: 4, social: 8 } },
@@ -767,11 +767,11 @@ const EVENTS_V2_PART2 = {
     midnight: [
       {
         id: 'd30_mid1',
-        text: '23:50，618收官倒计时！大屏最终定格在一个天文数字上，全场起立鼓掌！导师组织了庆功——几瓶啤酒、一些零食、还有一张写满签名的贺卡。"谢谢你这30天的付出。"俞闲举起杯子朝你笑。实习的最后10分钟，所有加班和摸鱼都变成了值得的回忆。',
+        text: '23:50，618收官倒计时！大屏最终定格在一个天文数字上，全场起立鼓掌！导师组织了庆功——几瓶啤酒、一些零食、还有一张写满签名的贺卡。"谢谢你这30天的付出。"同事举起杯子朝你笑。实习的最后10分钟，所有加班和摸鱼都变成了值得的回忆。',
         choices: [
           { text: '留下来庆祝到最后', effects: { fishing: 2, performance: 2, happy: 8, social: 9 } },
           { text: '喝完这杯默默离开', effects: { fishing: 0, performance: 0, happy: 5, social: 3 } },
-          { text: '鼓起勇气问俞闲联系方式', effects: { fishing: 0, performance: 0, happy: 7, social: 10 } },
+          { text: '鼓起勇气问同事联系方式', effects: { fishing: 0, performance: 0, happy: 7, social: 10 } },
         ],
         triggerMiniGame: null,
       }

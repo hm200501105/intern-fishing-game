@@ -72,7 +72,7 @@ const EVENTS_V2_PART1 = {
       },
       {
         id: 'd1_a2',
-        text: '装环境到一半卡住了，报了个从没见过的错。你google了半天没结果，俞闲从后面探过头来："这个我刚踩过坑，要改个配置文件。"她顺手帮你解决了。',
+        text: '装环境到一半卡住了，报了个从没见过的错。你google了半天没结果，同事从后面探过头来："这个我刚踩过坑，要改个配置文件。"顺手帮你解决了。',
         choices: [
           { text: '"谢谢！回头请你喝奶茶"', effects: { fishing: 0, performance: 2, happy: 3, social: 5 } },
           { text: '记下解决方法认真学', effects: { fishing: -3, performance: 5, happy: 1, social: 2 } },
@@ -123,7 +123,7 @@ const EVENTS_V2_PART1 = {
     afternoon: [
       {
         id: 'd2_a1',
-        text: '导师甩过来一个链接："先看看这个项目文档，大概200页，有问题随时问。"打开一看——密密麻麻的技术文档，上次更新是两年前。俞闲路过瞄了一眼："哈，这文档我当初也看了一周。"',
+        text: '导师甩过来一个链接："先看看这个项目文档，大概200页，有问题随时问。"打开一看——密密麻麻的技术文档，上次更新是两年前。同事路过瞄了一眼："哈，这文档我当初也看了一周。"',
         choices: [
           { text: '逐字逐句看文档', effects: { fishing: -7, performance: 8, happy: -4, social: 0 } },
           { text: '直接看代码更快', effects: { fishing: -2, performance: 5, happy: 0, social: 0 } },
@@ -152,7 +152,7 @@ const EVENTS_V2_PART1 = {
     noon: [
       {
         id: 'd3_n1',
-        text: '中午大家聊起周末计划，办公区的摸鱼氛围已经开始升温了。有人在偷偷看机票，有人已经开始收拾包，虽然才12点。有人说周末要打游戏通宵，俞闲说约了朋友去看展。',
+        text: '中午大家聊起周末计划，办公区的摸鱼氛围已经开始升温了。有人在偷偷看机票，有人已经开始收拾包，虽然才12点。有人说周末要打游戏通宵，同事说约了朋友去看展。',
         choices: [
           { text: '加入周末话题闲聊', effects: { fishing: 4, performance: -2, happy: 4, social: 5 } },
           { text: '趁大家聊天偷偷午睡', effects: { fishing: 5, performance: -1, happy: 3, social: 0 } },
@@ -238,7 +238,7 @@ const EVENTS_V2_PART1 = {
         choices: [
           { text: '明天再说继续看剧', effects: { fishing: 6, performance: -3, happy: 5, social: 0 } },
           { text: '花半小时简单整理', effects: { fishing: -2, performance: 4, happy: 1, social: 0 } },
-          { text: '发消息问俞闲怎么写', effects: { fishing: 1, performance: 2, happy: 2, social: 4 } },
+          { text: '发消息问同事怎么写', effects: { fishing: 1, performance: 2, happy: 2, social: 4 } },
         ],
         triggerMiniGame: null,
       }
@@ -349,7 +349,7 @@ const EVENTS_V2_PART1 = {
     noon: [
       {
         id: 'd7_n1',
-        text: '午饭时跟俞闲吐槽被review虐的经历。她笑着说："我第一个PR被打回了三次才过，习惯就好。导师严格是好事，说明把你当正式员工培养。"你心情好了一点。',
+        text: '午饭时跟同事吐槽被review虐的经历。对方笑着说："我第一个PR被打回了三次才过，习惯就好。导师严格是好事，说明把你当正式员工培养。"你心情好了一点。',
         choices: [
           { text: '"被你一说感觉好多了"', effects: { fishing: 1, performance: 1, happy: 4, social: 5 } },
           { text: '"三次？那我还好……"', effects: { fishing: 2, performance: 0, happy: 2, social: 3 } },
@@ -414,7 +414,7 @@ const EVENTS_V2_PART1 = {
     overtime: [
       {
         id: 'd8_o1',
-        text: '为了赶进度你决定加会班。7点的办公室，空调已经关了，暖气哄哄的。你打开代码，旁边只剩俞闲也在加班。她递过来一袋零食："撑住，写完一起走。"',
+        text: '为了赶进度你决定加会班。7点的办公室，空调已经关了，暖气哄哄的。你打开代码，旁边只剩同事也在加班。对方递过来一袋零食："撑住，写完一起走。"',
         choices: [
           { text: '效率拉满赶紧写完', effects: { fishing: -5, performance: 7, happy: 0, social: 2 } },
           { text: '边聊天边写慢慢来', effects: { fishing: 3, performance: 2, happy: 4, social: 5 } },
@@ -466,7 +466,7 @@ const EVENTS_V2_PART1 = {
     overtime: [
       {
         id: 'd9_o1',
-        text: '6:30了，你的代码今天差一点就能提交。是多写20分钟搞定，还是明天再说？俞闲在收拾东西准备走了，问你："要不要一起去吃个饭？"',
+        text: '6:30了，你的代码今天差一点就能提交。是多写20分钟搞定，还是明天再说？同事在收拾东西准备走了，问你："要不要一起去吃个饭？"',
         choices: [
           { text: '搞定代码再走', effects: { fishing: -4, performance: 6, happy: -1, social: -2 } },
           { text: '走！明天再写', effects: { fishing: 4, performance: -2, happy: 4, social: 5 } },
@@ -494,9 +494,9 @@ const EVENTS_V2_PART1 = {
     noon: [
       {
         id: 'd10_n1',
-        text: 'HR在大群发了通知：明天组织团建！可选A组"爬山健行"、B组"剧本杀"或C组"聚餐唱K"。群里炸了，大家开始站队。你选了剧本杀，俞闲选了爬山。',
+        text: 'HR在大群发了通知：明天组织团建！可选A组"爬山健行"、B组"剧本杀"或C组"聚餐唱K"。群里炸了，大家开始站队。你选了剧本杀，同事选了爬山。',
         choices: [
-          { text: '选爬山（和俞闲一组）', effects: { fishing: 1, performance: 1, happy: 3, social: 5 } },
+          { text: '选爬山（和同事一组）', effects: { fishing: 1, performance: 1, happy: 3, social: 5 } },
           { text: '选剧本杀（和你推理）', effects: { fishing: 4, performance: 0, happy: 5, social: 4 } },
           { text: '选聚餐唱K（最轻松）', effects: { fishing: 5, performance: -1, happy: 5, social: 3 } },
         ],
@@ -723,7 +723,7 @@ const EVENTS_V2_PART1 = {
     noon: [
       {
         id: 'd14_n1',
-        text: '午饭时俞闲问你实习到现在感觉怎么样。"就……一边觉得在学东西，一边觉得自己在摸鱼，很矛盾。"她笑："正常，大家都这样。重要的是你到底想从这段实习里得到什么。"',
+        text: '午饭时同事问你实习到现在感觉怎么样。"就……一边觉得在学东西，一边觉得自己在摸鱼，很矛盾。"对方笑："正常，大家都这样。重要的是你到底想从这段实习里得到什么。"',
         choices: [
           { text: '"想留下来转正"', effects: { fishing: -2, performance: 3, happy: 1, social: 3 } },
           { text: '"想多体验少内耗"', effects: { fishing: 3, performance: 0, happy: 4, social: 3 } },
@@ -739,7 +739,7 @@ const EVENTS_V2_PART1 = {
         choices: [
           { text: '去之前发现的宝藏角落', effects: { fishing: 4, performance: 3, happy: 3, social: 0 } },
           { text: '忍着噪音继续写', effects: { fishing: -2, performance: 4, happy: -2, social: 0 } },
-          { text: '约俞闲去咖啡厅写代码', effects: { fishing: 2, performance: 2, happy: 3, social: 4 } },
+          { text: '约同事去咖啡厅写代码', effects: { fishing: 2, performance: 2, happy: 3, social: 4 } },
         ],
         triggerMiniGame: null,
       }
@@ -764,7 +764,7 @@ const EVENTS_V2_PART1 = {
     noon: [
       {
         id: 'd15_n1',
-        text: '午饭时有个正式员工说他要跳槽了，下个月就走。你有点惊讶——"不是刚来半年吗？"他笑着说："互联网没有铁饭碗，有好机会就跳呗。"俞闲在旁边默默点头。',
+        text: '午饭时有个正式员工说他要跳槽了，下个月就走。你有点惊讶——"不是刚来半年吗？"他笑着说："互联网没有铁饭碗，有好机会就跳呗。"同事在旁边默默点头。',
         choices: [
           { text: '"祝你顺利！"', effects: { fishing: 1, performance: 0, happy: 1, social: 4 } },
           { text: '问他新公司什么情况', effects: { fishing: 3, performance: -1, happy: 2, social: 3 } },
@@ -776,7 +776,7 @@ const EVENTS_V2_PART1 = {
     afternoon: [
       {
         id: 'd15_a1',
-        text: '下午leader突然在群里@全员："今天下午4点临时开个会，关于下半年规划。"群里瞬间安静——临时全员会一般没好事。你看了看你，他耸耸肩："反正我要走了。"',
+        text: '下午leader突然在群里@全员："今天下午4点临时开个会，关于下半年规划。"群里瞬间安静——临时全员会一般没好事。你看了看旁边的人，对方耸耸肩："反正我要走了。"',
         choices: [
           { text: '认真准备听会内容', effects: { fishing: -3, performance: 5, happy: -1, social: 1 } },
           { text: '先打听一下什么情况', effects: { fishing: 2, performance: 1, happy: 0, social: 4 } },
@@ -788,9 +788,9 @@ const EVENTS_V2_PART1 = {
     overtime: [
       {
         id: 'd15_o1',
-        text: '会上leader宣布组织架构要调整，具体方案下周公布。散会后大家三三两两聊着猜测。你作为实习生不太确定这对自己意味着什么，但氛围明显有点微妙。俞闲拍了拍你的肩："别想太多，做好手头的事就行。"',
+        text: '会上leader宣布组织架构要调整，具体方案下周公布。散会后大家三三两两聊着猜测。你作为实习生不太确定这对自己意味着什么，但氛围明显有点微妙。同事拍了拍你的肩："别想太多，做好手头的事就行。"',
         choices: [
-          { text: '听俞闲的安心做事', effects: { fishing: -2, performance: 4, happy: 2, social: 3 } },
+          { text: '听同事的安心做事', effects: { fishing: -2, performance: 4, happy: 2, social: 3 } },
           { text: '有点焦虑想多了解情况', effects: { fishing: 2, performance: 1, happy: -2, social: 3 } },
           { text: '管他呢到点下班', effects: { fishing: 5, performance: -2, happy: 3, social: 0 } },
         ],
