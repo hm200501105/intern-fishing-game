@@ -4131,9 +4131,11 @@ function renderSaveSlots(mode) {
     const data = info[slot];
     if (data) {
       const date = new Date(data.timestamp).toLocaleString('zh-CN');
+      const cal = GameState.CALENDAR[data.day];
+      const dateStr = cal ? cal.date + ' ' + cal.weekday : 'Day ' + data.day;
       html += `<button class="save-slot" onclick="handleSlotClick('${slot}', '${mode}')">
         <strong>${slotNames[slot]}</strong><br>
-        <span style="font-size:0.8rem;color:#aaa;">Day ${data.day} · ${data.playerName} · ${date}</span>
+        <span style="font-size:0.8rem;color:#aaa;">${dateStr} · ${data.playerName} · ${date}</span>
       </button>`;
     } else {
       html += `<button class="save-slot save-slot-empty" onclick="handleSlotClick('${slot}', '${mode}')">
@@ -4147,7 +4149,9 @@ function renderSaveSlots(mode) {
 function handleSlotClick(slot, mode) {
   if (mode === 'load') {
     if (game.loadGame(slot)) {
-      game.advanceToNextEvent();
+      if (!game.state.currentEventId) {
+        game.advanceToNextEvent();
+      }
     } else {
       alert('该槽位没有存档');
     }
