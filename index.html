@@ -2595,25 +2595,77 @@ class BubbleGame {
     this.ctx = null;
     this.animFrame = null;
     this.timer = null;
-    this.timeLeft = 15;
+    this.timeLeft = 25;
     this.score = 0;
     this.bubbles = [];
     this.particles = [];
+    this.truthPopups = [];
+    this.usedIndices = [];
     this.lastSpawnTime = 0;
-    this.spawnInterval = 600;
+    this.spawnInterval = 1800;
     this.running = false;
 
     this.phrases = [
-      "明年一定给你转正", "期权马上就有了", "年底double", "下个季度调薪",
-      "你的成长我看在眼里", "这个项目做完就轻松了", "加班是为了你好",
-      "年轻人要多学习", "公司就是你的家", "我们是扁平化管理",
-      "弹性工作制", "结果导向不看过程", "你很有潜力", "这是给你锻炼的机会",
-      "薪资保密是保护你", "我当年比你还累", "格局要大",
-      "先把事情做好钱自然来", "不要太在意短期收益", "我们这个赛道前景很好",
-      "你是我见过最有潜力的实习生", "转正后待遇翻倍", "期权以后上市了值几百万",
-      "周末来加班算你调休", "这次绩效委屈你了下次补", "我跟HR提了给你涨薪",
-      "这个项目对你简历很有帮助", "别的公司更累的", "我们团队氛围最好了",
-      "实习期不算试用期到时直接转", "你很适合管理岗以后带团队"
+      { pie: "明年一定给你转正", truth: "已经说了三年了", shape: 'yuanbing' },
+      { pie: "期权马上就有了", truth: "公司还在亏损", shape: 'yuebing' },
+      { pie: "年底double", truth: "你的KPI永远差一点", shape: 'shaobing' },
+      { pie: "下个季度调薪", truth: "下个季度还有下个季度", shape: 'dabing' },
+      { pie: "你的成长我看在眼里", truth: "但工资不看", shape: 'xianbing' },
+      { pie: "这个项目做完就轻松了", truth: "后面还有十个项目", shape: 'yuanbing' },
+      { pie: "加班是为了你好", truth: "省了招人的钱", shape: 'yuebing' },
+      { pie: "年轻人要多学习", truth: "免费干活的借口", shape: 'shaobing' },
+      { pie: "公司就是你的家", truth: "你家不给钱吗", shape: 'dabing' },
+      { pie: "我们是扁平化管理", truth: "扁平化压榨", shape: 'xianbing' },
+      { pie: "弹性工作制", truth: "只弹不缩", shape: 'yuanbing' },
+      { pie: "结果导向不看过程", truth: "出了事全看过程", shape: 'yuebing' },
+      { pie: "你很有潜力", truth: "但现在不值钱", shape: 'shaobing' },
+      { pie: "这是锻炼的机会", truth: "没人愿意干", shape: 'dabing' },
+      { pie: "薪资保密是保护你", truth: "怕你知道后离职", shape: 'xianbing' },
+      { pie: "我当年比你还累", truth: "所以你也得累", shape: 'yuanbing' },
+      { pie: "格局要大", truth: "钱你别想了", shape: 'yuebing' },
+      { pie: "先做好事钱自然来", truth: "钱：我不来", shape: 'shaobing' },
+      { pie: "不在意短期收益", truth: "长期也没有", shape: 'dabing' },
+      { pie: "赛道前景很好", truth: "但你看不到那天", shape: 'xianbing' },
+      { pie: "你是最有潜力的实习生", truth: "每个实习生都听过", shape: 'yuanbing' },
+      { pie: "转正后待遇翻倍", truth: "0乘2还是0", shape: 'yuebing' },
+      { pie: "周末加班算调休", truth: "调休永远请不了", shape: 'shaobing' },
+      { pie: "绩效委屈你了下次补", truth: "下次也委屈", shape: 'dabing' },
+      { pie: "我跟HR说了给你涨", truth: "HR:没人跟我说", shape: 'xianbing' },
+      { pie: "对你简历很有帮助", truth: "对公司更有帮助", shape: 'yuanbing' },
+      { pie: "别的公司更累", truth: "所以你别走", shape: 'yuebing' },
+      { pie: "团队氛围最好了", truth: "最好的PUA氛围", shape: 'shaobing' },
+      { pie: "实习期直接转正", truth: "转正名额：0", shape: 'dabing' },
+      { pie: "以后带团队", truth: "先把活干了", shape: 'xianbing' },
+      { pie: "我把你当兄弟", truth: "兄弟才不计较钱", shape: 'yuanbing' },
+      { pie: "试用期过了就好了", truth: "过了还有考核期", shape: 'yuebing' },
+      { pie: "忙完这阵就放假", truth: "永远忙不完", shape: 'shaobing' },
+      { pie: "公司不会亏待你的", truth: "但会亏待你的时间", shape: 'dabing' },
+      { pie: "你是不可替代的", truth: "招聘已经在面新人了", shape: 'xianbing' },
+      { pie: "这是创业公司的节奏", truth: "创业的是老板不是你", shape: 'yuanbing' },
+      { pie: "未来你会感谢现在的自己", truth: "现在先感谢你加班", shape: 'yuebing' },
+      { pie: "我对你期望很高", truth: "期望高活也多", shape: 'shaobing' },
+      { pie: "今年形势不好先稳一稳", truth: "翻译：别想加薪了", shape: 'dabing' },
+      { pie: "你的努力大家有目共睹", truth: "共睹不共付", shape: 'xianbing' },
+      { pie: "能者多劳嘛", truth: "多劳不多得", shape: 'yuanbing' },
+      { pie: "这个需求很简单", truth: "做完就三天了", shape: 'yuebing' },
+      { pie: "加班多给你报个打车", truth: "加班费没有", shape: 'shaobing' },
+      { pie: "我们注重work-life balance", truth: "work占95%", shape: 'dabing' },
+      { pie: "先拿结果再谈回报", truth: "拿了结果再画新饼", shape: 'xianbing' },
+      { pie: "明年预算下来就涨", truth: "预算永远不够", shape: 'yuanbing' },
+      { pie: "你这个级别已经很高了", truth: "高级别低工资", shape: 'yuebing' },
+      { pie: "我们是一个大家庭", truth: "家里人不谈钱", shape: 'shaobing' },
+      { pie: "年后会有好消息", truth: "好消息是还有工作", shape: 'dabing' },
+      { pie: "这个晋升名额本来是你的", truth: "本来不是现在也不是", shape: 'xianbing' },
+      { pie: "你来得正是时候", truth: "刚好缺人干活", shape: 'yuanbing' },
+      { pie: "老板很看好你", truth: "看好你能多干活", shape: 'yuebing' },
+      { pie: "先做出成绩再说", truth: "做出来也不说", shape: 'shaobing' },
+      { pie: "我给你争取过了", truth: "争取了0.5秒", shape: 'dabing' },
+      { pie: "公司正在高速发展", truth: "高速压榨中", shape: 'xianbing' },
+      { pie: "以你的能力不止于此", truth: "所以多干点", shape: 'yuanbing' },
+      { pie: "这波做好了请你们吃饭", truth: "最多海底捞", shape: 'yuebing' },
+      { pie: "再坚持坚持", truth: "坚持到下一个人来接盘", shape: 'shaobing' },
+      { pie: "我向上反映了", truth: "反映完就忘了", shape: 'dabing' },
+      { pie: "你是团队的核心", truth: "核心免费劳动力", shape: 'xianbing' },
     ];
 
     this.colors = [
@@ -2679,6 +2731,7 @@ class BubbleGame {
           y >= b.y - b.h / 2 && y <= b.y + b.h / 2) {
         this.score++;
         this.createExplosion(b.x, b.y, b.color);
+        this.truthPopups.push({ text: b.truth, x: b.x, y: b.y, life: 2.0, scale: 0 });
         this.bubbles.splice(i, 1);
         break;
       }
@@ -2702,12 +2755,23 @@ class BubbleGame {
   }
 
   spawnBubble() {
-    const text = this.phrases[Math.floor(Math.random() * this.phrases.length)];
+    if (this.bubbles.length >= 2) return;
+    let idx;
+    let attempts = 0;
+    do {
+      idx = Math.floor(Math.random() * this.phrases.length);
+      attempts++;
+    } while (this.usedIndices.includes(idx) && attempts < 20);
+    this.usedIndices.push(idx);
+    if (this.usedIndices.length > this.phrases.length / 2) this.usedIndices.shift();
+
+    const item = this.phrases[idx];
+    const text = item.pie;
     const fontSize = 14;
     this.ctx.font = fontSize + 'px sans-serif';
     const textWidth = this.ctx.measureText(text).width;
-    const w = textWidth + 30;
-    const h = 44;
+    const w = textWidth + 40;
+    const h = 50;
     const x = Math.random() * (this.width - w) + w / 2;
 
     this.bubbles.push({
@@ -2716,7 +2780,9 @@ class BubbleGame {
       w: w,
       h: h,
       text: text,
-      speed: 1.5 + Math.random() * 1.5,
+      truth: item.truth,
+      shape: item.shape,
+      speed: 1.0 + Math.random() * 0.8,
       color: this.colors[Math.floor(Math.random() * this.colors.length)],
       fontSize: fontSize
     });
@@ -2742,7 +2808,7 @@ class BubbleGame {
     if (this.lastSpawnTime >= this.spawnInterval) {
       this.spawnBubble();
       this.lastSpawnTime = 0;
-      this.spawnInterval = Math.max(300, this.spawnInterval - 5);
+      this.spawnInterval = Math.max(1200, this.spawnInterval - 10);
     }
 
     this.update(dt);
@@ -2769,44 +2835,65 @@ class BubbleGame {
         this.particles.splice(i, 1);
       }
     }
+
+    for (let i = this.truthPopups.length - 1; i >= 0; i--) {
+      const t = this.truthPopups[i];
+      t.life -= 0.015;
+      t.scale = Math.min(1, t.scale + 0.12);
+      t.y -= 0.4;
+      if (t.life <= 0) {
+        this.truthPopups.splice(i, 1);
+      }
+    }
   }
 
   render() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
 
-    // 背景
     ctx.fillStyle = '#f0f4f8';
     ctx.fillRect(0, 0, this.width, this.height);
 
-    // 气泡
+    // 画各种饼
     for (const b of this.bubbles) {
       ctx.save();
-      ctx.fillStyle = b.color;
-      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-      ctx.lineWidth = 1;
-      this.roundRect(ctx, b.x - b.w / 2, b.y - b.h / 2, b.w, b.h, 20);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#333';
-      ctx.font = b.fontSize + 'px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(b.text, b.x, b.y);
+      ctx.translate(b.x, b.y);
+      this.drawPieShape(ctx, b);
       ctx.restore();
     }
 
-    // 粒子
+    // 粒子（碎饼渣）
     for (const p of this.particles) {
       ctx.save();
       ctx.globalAlpha = p.life;
       ctx.fillStyle = p.color;
-      ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
     }
 
-    // HUD - 顶部
+    // 真相弹窗
+    for (const t of this.truthPopups) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, t.life * 2.5);
+      ctx.translate(t.x, t.y);
+      ctx.scale(t.scale, t.scale);
+      // 背景黑框
+      ctx.font = 'bold 16px sans-serif';
+      const tw = ctx.measureText(t.text).width;
+      ctx.fillStyle = 'rgba(0,0,0,0.85)';
+      this.roundRect(ctx, -tw/2 - 12, -14, tw + 24, 32, 8);
+      ctx.fill();
+      // 文字
+      ctx.fillStyle = '#ff4757';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(t.text, 0, 2);
+      ctx.restore();
+    }
+
+    // HUD
     ctx.fillStyle = 'rgba(0,0,0,0.7)';
     ctx.fillRect(0, 0, this.width, 50);
     ctx.fillStyle = '#fff';
@@ -2815,13 +2902,105 @@ class BubbleGame {
     ctx.textBaseline = 'middle';
     ctx.fillText('⏱ ' + this.timeLeft + 's', 15, 25);
     ctx.textAlign = 'right';
-    ctx.fillText('得分: ' + this.score, this.width - 15, 25);
+    ctx.fillText('💥 ' + this.score, this.width - 15, 25);
 
-    // 底部提示
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.font = '16px sans-serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.font = '14px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('戳破老板的饼！', this.width / 2, this.height - 30);
+    ctx.fillText('👆 戳破老板的饼！', this.width / 2, this.height - 25);
+  }
+
+  drawPieShape(ctx, b) {
+    const w = b.w, h = b.h;
+    switch (b.shape) {
+      case 'yuanbing': // 圆饼 — 圆形，芝麻点缀
+        ctx.fillStyle = '#f5d799';
+        ctx.strokeStyle = '#c8a24e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, w/2, h/2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // 芝麻
+        ctx.fillStyle = '#8B7355';
+        for (let i = 0; i < 5; i++) {
+          ctx.fillRect(-w/4 + i*12, -3 + (i%2)*6, 3, 2);
+        }
+        break;
+      case 'yuebing': // 月饼 — 方圆形，花纹边框
+        ctx.fillStyle = '#d4872c';
+        ctx.strokeStyle = '#8B4513';
+        ctx.lineWidth = 3;
+        this.roundRect(ctx, -w/2, -h/2, w, h, 12);
+        ctx.fill();
+        ctx.stroke();
+        // 内部花纹
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 1;
+        this.roundRect(ctx, -w/2+6, -h/2+6, w-12, h-12, 8);
+        ctx.stroke();
+        break;
+      case 'shaobing': // 烧饼 — 椭圆形，焦黄带裂纹
+        ctx.fillStyle = '#e8c16a';
+        ctx.strokeStyle = '#b8860b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, w/2, h/2 - 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // 焦痕
+        ctx.strokeStyle = '#8B6914';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-w/6, -h/6); ctx.lineTo(w/8, h/8);
+        ctx.moveTo(w/6, -h/5); ctx.lineTo(-w/8, h/6);
+        ctx.stroke();
+        break;
+      case 'dabing': // 大饼 — 大圆，层次纹理
+        ctx.fillStyle = '#f0d58c';
+        ctx.strokeStyle = '#c8a24e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, Math.min(w,h)/2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // 螺旋纹
+        ctx.strokeStyle = '#d4a843';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(0, 0, Math.min(w,h)/3.5, 0, Math.PI * 1.5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, Math.min(w,h)/5, 0.5, Math.PI * 1.2);
+        ctx.stroke();
+        break;
+      case 'xianbing': // 馅饼 — 半月形，有褶子
+        ctx.fillStyle = '#f5e6c8';
+        ctx.strokeStyle = '#c8a24e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(0, 2, w/2, h/2 - 2, 0, 0, Math.PI);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // 褶子
+        ctx.strokeStyle = '#b8960b';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 5; i++) {
+          const px = -w/3 + i * (w/6);
+          ctx.beginPath();
+          ctx.moveTo(px, -2);
+          ctx.quadraticCurveTo(px + 3, -8, px + 6, -2);
+          ctx.stroke();
+        }
+        break;
+    }
+    // 文字
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold ' + b.fontSize + 'px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(b.text, 0, b.shape === 'xianbing' ? 8 : 0);
   }
 
   roundRect(ctx, x, y, w, h, r) {
@@ -2903,14 +3082,17 @@ class DecodeGame {
     this.container = container;
     this.onComplete = onComplete;
     this.timer = null;
-    this.timeLeft = 20;
+    this.timeLeft = 35;
     this.score = 0;
     this.combo = 0;
-    this.selectedTop = null;
-    this.selectedBottom = null;
+    this.selectedLeft = null;
+    this.selectedRight = null;
     this.running = false;
     this.pairs = [];
     this.matchedPairs = 0;
+    this.lines = [];
+    this.canvas = null;
+    this.ctx = null;
 
     this.allPairs = [
       { black: "这个需求很简单", truth: "加班到凌晨" },
@@ -2934,7 +3116,17 @@ class DecodeGame {
       { black: "我们敏捷开发", truth: "没文档直接开干" },
       { black: "下次注意", truth: "记仇了" },
       { black: "你这个方案很有想法", truth: "不会采纳" },
-      { black: "有什么想法随时找我", truth: "别来找我" }
+      { black: "有什么想法随时找我", truth: "别来找我" },
+      { black: "我们价值观一致", truth: "听我的就行" },
+      { black: "辛苦了", truth: "活还没干完" },
+      { black: "这件事优先级很高", truth: "今晚别想走了" },
+      { black: "我们要有全局视角", truth: "别人的活你也干" },
+      { black: "方案再优化优化", truth: "推倒重来" },
+      { black: "你最近状态不错", truth: "准备给你加活了" },
+      { black: "这是跨团队协作", truth: "没人负责的烂摊子" },
+      { black: "我们开个短会", truth: "至少一小时" },
+      { black: "你的反馈很重要", truth: "反馈完照样不改" },
+      { black: "我们鼓励创新", truth: "但别跟现在不一样" }
     ];
   }
 
@@ -2947,18 +3139,20 @@ class DecodeGame {
 
   selectPairs() {
     const shuffled = [...this.allPairs].sort(() => Math.random() - 0.5);
-    this.pairs = shuffled.slice(0, 4);
+    this.pairs = shuffled.slice(0, 6);
+    this.rightOrder = [...this.pairs].sort(() => Math.random() - 0.5);
   }
 
   createDOM() {
     const wrapper = document.createElement('div');
+    wrapper.id = 'decode-wrapper';
     wrapper.style.cssText = `
       width: 100%; height: 100%; display: flex; flex-direction: column;
       background: #1a1a2e; padding: 0; box-sizing: border-box;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      position: relative;
     `;
 
-    // HUD
     const hud = document.createElement('div');
     hud.style.cssText = `
       display: flex; justify-content: space-between; align-items: center;
@@ -2972,205 +3166,217 @@ class DecodeGame {
     `;
     wrapper.appendChild(hud);
 
-    // 标题
     const title = document.createElement('div');
-    title.style.cssText = `
-      text-align: center; color: #aaa; font-size: 14px; padding: 5px 0;
-      flex-shrink: 0;
-    `;
-    title.textContent = '将黑话与真实含义配对';
+    title.style.cssText = 'text-align: center; color: #aaa; font-size: 13px; padding: 4px 0; flex-shrink: 0;';
+    title.textContent = '每句黑话背后，都是一个被互联网腌入味的打工人';
     wrapper.appendChild(title);
 
-    // 上方黑话卡片区
-    const topLabel = document.createElement('div');
-    topLabel.style.cssText = 'color: #7eb8da; font-size: 13px; padding: 8px 16px; flex-shrink: 0;';
-    topLabel.textContent = '▼ 职场黑话';
-    wrapper.appendChild(topLabel);
-
-    const topArea = document.createElement('div');
-    topArea.id = 'decode-top-area';
-    topArea.style.cssText = `
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      padding: 0 16px; flex: 1; align-content: start;
-    `;
-    wrapper.appendChild(topArea);
-
-    // 下方真话卡片区
-    const bottomLabel = document.createElement('div');
-    bottomLabel.style.cssText = 'color: #e8a838; font-size: 13px; padding: 8px 16px; flex-shrink: 0;';
-    bottomLabel.textContent = '▼ 真实含义';
-    wrapper.appendChild(bottomLabel);
-
-    const bottomArea = document.createElement('div');
-    bottomArea.id = 'decode-bottom-area';
-    bottomArea.style.cssText = `
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      padding: 0 16px 16px; flex: 1; align-content: start;
-    `;
-    wrapper.appendChild(bottomArea);
+    const canvasWrap = document.createElement('div');
+    canvasWrap.style.cssText = 'flex: 1; position: relative; padding: 8px 0;';
+    wrapper.appendChild(canvasWrap);
 
     this.container.appendChild(wrapper);
 
-    // 创建卡片
-    const shuffledTruths = [...this.pairs].sort(() => Math.random() - 0.5);
+    const content = document.createElement('div');
+    content.style.cssText = `
+      position: absolute; inset: 0; display: flex; justify-content: space-between;
+      padding: 0 12px; align-items: stretch;
+    `;
+    canvasWrap.appendChild(content);
+
+    const leftCol = document.createElement('div');
+    leftCol.style.cssText = 'display: flex; flex-direction: column; justify-content: space-around; width: 42%; gap: 4px;';
+    content.appendChild(leftCol);
+
+    const rightCol = document.createElement('div');
+    rightCol.style.cssText = 'display: flex; flex-direction: column; justify-content: space-around; width: 42%; gap: 4px;';
+    content.appendChild(rightCol);
+
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.cssText = 'position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;';
+    canvasWrap.appendChild(this.canvas);
+
+    this.leftCards = [];
+    this.rightCards = [];
 
     this.pairs.forEach((pair, idx) => {
-      const card = this.createCard(pair.black, 'top', idx);
-      topArea.appendChild(card);
+      const card = this.createCard(pair.black, 'left', idx);
+      leftCol.appendChild(card);
+      this.leftCards.push(card);
     });
 
-    shuffledTruths.forEach((pair, idx) => {
+    this.rightOrder.forEach((pair) => {
       const originalIdx = this.pairs.indexOf(pair);
-      const card = this.createCard(pair.truth, 'bottom', originalIdx);
-      bottomArea.appendChild(card);
+      const card = this.createCard(pair.truth, 'right', originalIdx);
+      rightCol.appendChild(card);
+      this.rightCards.push(card);
+    });
+
+    requestAnimationFrame(() => {
+      const rect = canvasWrap.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      this.canvas.width = rect.width * dpr;
+      this.canvas.height = rect.height * dpr;
+      this.ctx = this.canvas.getContext('2d');
+      this.ctx.scale(dpr, dpr);
+      this.canvasRect = rect;
     });
   }
 
-  createCard(text, type, pairIndex) {
+  createCard(text, side, pairIndex) {
     const card = document.createElement('div');
-    card.dataset.type = type;
+    card.dataset.side = side;
     card.dataset.pairIndex = pairIndex;
+    const isLeft = side === 'left';
     card.style.cssText = `
-      background: ${type === 'top' ? '#16213e' : '#2d1810'};
-      border: 2px solid ${type === 'top' ? '#4a7eb5' : '#d4831a'};
-      border-radius: 12px; padding: 12px 8px; text-align: center;
-      color: white; font-size: 13px; cursor: pointer;
+      background: ${isLeft ? '#16213e' : '#2d1810'};
+      border: 2px solid ${isLeft ? '#4a7eb5' : '#d4831a'};
+      border-radius: 10px; padding: 8px 6px; text-align: center;
+      color: white; font-size: 12px; cursor: pointer;
       transition: all 0.2s ease; user-select: none;
       display: flex; align-items: center; justify-content: center;
-      min-height: 50px;
+      min-height: 36px; position: relative;
     `;
     card.textContent = text;
 
     const handler = (e) => {
       e.preventDefault();
       if (!this.running) return;
-      this.handleCardClick(card, type, pairIndex);
+      this.handleCardClick(card, side, pairIndex);
     };
-
     card.addEventListener('click', handler);
-    card.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      handler(e);
-    });
-
+    card.addEventListener('touchend', (e) => { e.preventDefault(); handler(e); });
     return card;
   }
 
-  handleCardClick(card, type, pairIndex) {
+  handleCardClick(card, side, pairIndex) {
     if (card.dataset.matched === 'true') return;
-
-    if (type === 'top') {
-      if (this.selectedTop) {
-        this.selectedTop.style.transform = '';
-        this.selectedTop.style.boxShadow = '';
-      }
-      this.selectedTop = card;
-      this.selectedTopIndex = pairIndex;
+    if (side === 'left') {
+      if (this.selectedLeft) { this.selectedLeft.style.transform = ''; this.selectedLeft.style.boxShadow = ''; }
+      this.selectedLeft = card;
+      this.selectedLeftIndex = pairIndex;
       card.style.transform = 'scale(1.05)';
-      card.style.boxShadow = '0 0 15px rgba(74, 126, 181, 0.8)';
+      card.style.boxShadow = '0 0 12px rgba(74, 126, 181, 0.8)';
     } else {
-      if (this.selectedBottom) {
-        this.selectedBottom.style.transform = '';
-        this.selectedBottom.style.boxShadow = '';
-      }
-      this.selectedBottom = card;
-      this.selectedBottomIndex = pairIndex;
+      if (this.selectedRight) { this.selectedRight.style.transform = ''; this.selectedRight.style.boxShadow = ''; }
+      this.selectedRight = card;
+      this.selectedRightIndex = pairIndex;
       card.style.transform = 'scale(1.05)';
-      card.style.boxShadow = '0 0 15px rgba(212, 131, 26, 0.8)';
+      card.style.boxShadow = '0 0 12px rgba(212, 131, 26, 0.8)';
     }
-
-    if (this.selectedTop && this.selectedBottom) {
-      this.checkMatch();
-    }
+    if (this.selectedLeft && this.selectedRight) this.checkMatch();
   }
 
   checkMatch() {
-    const topCard = this.selectedTop;
-    const bottomCard = this.selectedBottom;
-    const topIdx = this.selectedTopIndex;
-    const bottomIdx = this.selectedBottomIndex;
+    const leftCard = this.selectedLeft;
+    const rightCard = this.selectedRight;
+    const leftIdx = this.selectedLeftIndex;
+    const rightIdx = this.selectedRightIndex;
+    this.selectedLeft = null;
+    this.selectedRight = null;
 
-    this.selectedTop = null;
-    this.selectedBottom = null;
-
-    if (topIdx === bottomIdx) {
-      // 匹配成功
+    if (leftIdx === rightIdx) {
       this.combo++;
       this.score += this.combo;
       this.matchedPairs++;
-
-      topCard.dataset.matched = 'true';
-      bottomCard.dataset.matched = 'true';
-
-      topCard.style.background = 'rgba(40, 167, 69, 0.3)';
-      topCard.style.border = '2px solid #28a745';
-      topCard.style.transform = '';
-      topCard.style.boxShadow = '';
-      bottomCard.style.background = 'rgba(40, 167, 69, 0.3)';
-      bottomCard.style.border = '2px solid #28a745';
-      bottomCard.style.transform = '';
-      bottomCard.style.boxShadow = '';
-
-      // 对勾动画
-      this.showCheckmark(topCard);
-      this.showCheckmark(bottomCard);
-
-      // 显示连击
+      leftCard.dataset.matched = 'true';
+      rightCard.dataset.matched = 'true';
+      this.drawLine(leftCard, rightCard, true);
+      leftCard.style.background = 'rgba(40, 167, 69, 0.3)';
+      leftCard.style.border = '2px solid #28a745';
+      leftCard.style.transform = '';
+      leftCard.style.boxShadow = '0 0 20px rgba(40, 167, 69, 0.6)';
+      rightCard.style.background = 'rgba(40, 167, 69, 0.3)';
+      rightCard.style.border = '2px solid #28a745';
+      rightCard.style.transform = '';
+      rightCard.style.boxShadow = '0 0 20px rgba(40, 167, 69, 0.6)';
+      this.showSuccessEffect(leftCard);
       if (this.combo > 1) {
         const comboEl = document.getElementById('decode-combo');
-        if (comboEl) {
-          comboEl.style.display = 'inline';
-          comboEl.textContent = this.combo + '连击!';
-          setTimeout(() => { comboEl.style.display = 'none'; }, 800);
-        }
+        if (comboEl) { comboEl.style.display = 'inline'; comboEl.textContent = this.combo + '连击!'; setTimeout(() => { comboEl.style.display = 'none'; }, 800); }
       }
-
       this.updateScore();
-
-      // 淡出
-      setTimeout(() => {
-        topCard.style.opacity = '0.4';
-        bottomCard.style.opacity = '0.4';
-        topCard.style.pointerEvents = 'none';
-        bottomCard.style.pointerEvents = 'none';
-      }, 500);
-
-      if (this.matchedPairs >= 4) {
-        setTimeout(() => this.endGame(), 600);
-      }
+      if (this.matchedPairs >= 6) setTimeout(() => this.endGame(), 600);
     } else {
-      // 匹配失败
       this.combo = 0;
-      this.shakeCard(topCard);
-      this.shakeCard(bottomCard);
+      this.drawLine(leftCard, rightCard, false);
+      this.shakeCard(leftCard);
+      this.shakeCard(rightCard);
     }
   }
 
-  showCheckmark(card) {
-    const check = document.createElement('div');
-    check.textContent = '✓';
-    check.style.cssText = `
-      position: absolute; font-size: 24px; color: #28a745;
-      font-weight: bold; animation: fadeInUp 0.3s ease;
-    `;
-    card.style.position = 'relative';
-    card.appendChild(check);
-    setTimeout(() => check.remove(), 1000);
+  drawLine(leftCard, rightCard, success) {
+    if (!this.ctx || !this.canvasRect) return;
+    const ctx = this.ctx;
+    const cr = this.canvasRect;
+    const lr = leftCard.getBoundingClientRect();
+    const rr = rightCard.getBoundingClientRect();
+    const x1 = lr.right - cr.left;
+    const y1 = lr.top + lr.height / 2 - cr.top;
+    const x2 = rr.left - cr.left;
+    const y2 = rr.top + rr.height / 2 - cr.top;
+
+    if (success) this.lines.push({ x1, y1, x2, y2 });
+    this.redrawLines();
+
+    if (!success) {
+      ctx.save();
+      ctx.strokeStyle = '#dc3545';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+      setTimeout(() => this.redrawLines(), 400);
+    }
+  }
+
+  redrawLines() {
+    if (!this.ctx) return;
+    const ctx = this.ctx;
+    const w = this.canvas.width / (window.devicePixelRatio || 1);
+    const h = this.canvas.height / (window.devicePixelRatio || 1);
+    ctx.clearRect(0, 0, w, h);
+    for (const line of this.lines) {
+      ctx.save();
+      ctx.strokeStyle = '#28a745';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = '#28a745';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(line.x1, line.y1);
+      ctx.lineTo(line.x2, line.y2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  showSuccessEffect(card) {
+    const wrapper = document.getElementById('decode-wrapper');
+    if (!wrapper) return;
+    const cr = wrapper.getBoundingClientRect();
+    const lr = card.getBoundingClientRect();
+    const cx = lr.right - cr.left;
+    const cy = lr.top + lr.height/2 - cr.top;
+    for (let i = 0; i < 8; i++) {
+      const p = document.createElement('div');
+      const size = 5 + Math.random() * 5;
+      const angle = (Math.PI * 2 * i) / 8;
+      const dist = 25 + Math.random() * 20;
+      p.style.cssText = `position:absolute;width:${size}px;height:${size}px;background:#4ecdc4;border-radius:50%;left:${cx}px;top:${cy}px;transition:all 0.5s ease-out;opacity:1;z-index:20;pointer-events:none;`;
+      wrapper.appendChild(p);
+      requestAnimationFrame(() => { p.style.left=(cx+Math.cos(angle)*dist)+'px'; p.style.top=(cy+Math.sin(angle)*dist)+'px'; p.style.opacity='0'; p.style.transform='scale(0)'; });
+      setTimeout(() => p.remove(), 600);
+    }
   }
 
   shakeCard(card) {
     card.style.border = '2px solid #dc3545';
     card.style.animation = 'shake 0.4s ease';
     card.style.boxShadow = '0 0 10px rgba(220, 53, 69, 0.5)';
-
-    setTimeout(() => {
-      card.style.border = card.dataset.type === 'top'
-        ? '2px solid #4a7eb5'
-        : '2px solid #d4831a';
-      card.style.animation = '';
-      card.style.transform = '';
-      card.style.boxShadow = '';
-    }, 400);
+    setTimeout(() => { card.style.border = card.dataset.side === 'left' ? '2px solid #4a7eb5' : '2px solid #d4831a'; card.style.animation = ''; card.style.transform = ''; card.style.boxShadow = ''; }, 400);
   }
 
   updateScore() {
@@ -3183,28 +3389,12 @@ class DecodeGame {
       this.timeLeft--;
       const timeEl = document.getElementById('decode-time');
       if (timeEl) timeEl.textContent = '⏱ ' + this.timeLeft + 's';
-      if (this.timeLeft <= 0) {
-        this.endGame();
-      }
+      if (this.timeLeft <= 0) this.endGame();
     }, 1000);
-
-    // 注入动画样式
     if (!document.getElementById('decode-styles')) {
       const style = document.createElement('style');
       style.id = 'decode-styles';
-      style.textContent = `
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20% { transform: translateX(-5px); }
-          40% { transform: translateX(5px); }
-          60% { transform: translateX(-5px); }
-          80% { transform: translateX(5px); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `;
+      style.textContent = '@keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }';
       document.head.appendChild(style);
     }
   }
@@ -3212,54 +3402,26 @@ class DecodeGame {
   endGame() {
     this.running = false;
     if (this.timer) clearInterval(this.timer);
-
     let finalScore;
-    if (this.matchedPairs >= 4) finalScore = 3;
-    else if (this.matchedPairs >= 2) finalScore = 2;
+    if (this.matchedPairs >= 6) finalScore = 3;
+    else if (this.matchedPairs >= 3) finalScore = 2;
     else finalScore = 1;
-
     this.showResult(finalScore);
   }
 
   showResult(finalScore) {
     const overlay = document.createElement('div');
-    overlay.style.cssText = `
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
-      align-items: center; justify-content: center; z-index: 100;
-    `;
-
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;';
     const labels = ['', '职场小白', '黑话达人', '解码大师'];
-    overlay.innerHTML = `
-      <div style="background: #1a1a2e; border: 1px solid #444; border-radius: 16px; padding: 30px 40px; text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 10px;">🔍</div>
-        <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 8px;">
-          配对成功 ${this.matchedPairs} 组
-        </div>
-        <div style="font-size: 16px; color: #aaa; margin-bottom: 20px;">${labels[finalScore]}</div>
-        <button id="decode-continue-btn" style="
-          padding: 12px 40px; font-size: 16px; border: none;
-          background: #e8a838; color: white; border-radius: 25px; cursor: pointer;
-        ">继续</button>
-      </div>
-    `;
-
-    this.container.appendChild(overlay);
-
-    const btn = document.getElementById('decode-continue-btn');
-    btn.addEventListener('click', () => {
-      if (this.onComplete) this.onComplete(finalScore);
-    });
-    btn.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      if (this.onComplete) this.onComplete(finalScore);
-    });
+    overlay.innerHTML = '<div style="background:#1a1a2e;border:1px solid #444;border-radius:16px;padding:30px 40px;text-align:center;"><div style="font-size:48px;margin-bottom:10px;">🔍</div><div style="font-size:22px;font-weight:bold;color:white;margin-bottom:8px;">配对成功 ' + this.matchedPairs + ' 组</div><div style="font-size:16px;color:#aaa;margin-bottom:20px;">' + labels[finalScore] + '</div><button style="padding:12px 40px;font-size:16px;border:none;background:#e8a838;color:white;border-radius:25px;cursor:pointer;">继续</button></div>';
+    document.body.appendChild(overlay);
+    const btn = overlay.querySelector('button');
+    const complete = () => { overlay.remove(); if (this.onComplete) this.onComplete(finalScore); };
+    btn.addEventListener('click', complete);
+    btn.addEventListener('touchend', (e) => { e.preventDefault(); complete(); });
   }
 
-  destroy() {
-    this.running = false;
-    if (this.timer) clearInterval(this.timer);
-  }
+  destroy() { this.running = false; if (this.timer) clearInterval(this.timer); }
 }
 
 // ============================================================
