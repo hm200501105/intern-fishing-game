@@ -1,0 +1,4019 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>实习摸鱼记</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #1a1a2e; color: #eee; }
+.screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: opacity 0.3s ease; padding: 20px; }
+.screen-active { opacity: 1; }
+.screen-hidden { opacity: 0; }
+
+/* 标题画面 */
+#screen-title { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+.title-logo { font-size: 3rem; margin-bottom: 10px; }
+.title-name { font-size: 2rem; font-weight: bold; margin-bottom: 8px; background: linear-gradient(90deg, #4ecdc4, #44bd8e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.title-sub { font-size: 0.9rem; color: #888; margin-bottom: 40px; }
+.btn { display: block; width: 200px; padding: 14px 0; margin: 8px auto; border: none; border-radius: 25px; font-size: 1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+.btn:active { transform: scale(0.95); }
+.btn-primary { background: linear-gradient(135deg, #4ecdc4, #44bd8e); color: #fff; box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3); }
+.btn-secondary { background: rgba(255,255,255,0.1); color: #ccc; border: 1px solid #444; }
+
+/* 角色选择 */
+#screen-charSelect { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+.char-title { font-size: 1.5rem; margin-bottom: 30px; }
+.char-options { display: flex; gap: 20px; }
+.char-card { width: 140px; padding: 30px 20px; border-radius: 16px; text-align: center; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; }
+.char-card:hover, .char-card:active { transform: translateY(-5px); border-color: #4ecdc4; }
+.char-card-male { background: rgba(74, 144, 226, 0.15); }
+.char-card-female { background: rgba(255, 107, 129, 0.15); }
+.char-emoji { font-size: 3rem; margin-bottom: 10px; }
+.char-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+.char-desc { font-size: 0.8rem; color: #888; }
+
+/* 游戏主界面 */
+#screen-game { background: #1a1a2e; justify-content: flex-start; padding: 0; }
+#status-bar { width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); border-bottom: 1px solid #333; flex-shrink: 0; }
+.status-info { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; color: #aaa; }
+.status-stats { display: flex; justify-content: space-around; font-size: 0.85rem; }
+.status-stats span { padding: 2px 6px; border-radius: 10px; background: rgba(255,255,255,0.05); }
+#event-container { flex: 1; width: 100%; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; justify-content: center; }
+.event-title { font-size: 1.1rem; color: #4ecdc4; margin-bottom: 10px; text-align: center; }
+.event-text { font-size: 0.95rem; line-height: 1.7; color: #ddd; margin-bottom: 25px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; border-left: 3px solid #4ecdc4; }
+.event-choices { display: flex; flex-direction: column; gap: 10px; }
+.choice-btn { width: 100%; padding: 14px 20px; border: 1px solid #3a3a5a; border-radius: 12px; background: rgba(255,255,255,0.05); color: #eee; font-size: 0.95rem; cursor: pointer; text-align: left; transition: all 0.2s; }
+.choice-btn:hover, .choice-btn:active { background: rgba(78, 205, 196, 0.15); border-color: #4ecdc4; transform: translateX(5px); }
+.game-menu-btn { position: fixed; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: #aaa; font-size: 1.2rem; cursor: pointer; z-index: 100; }
+.result-text { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; z-index: 50; }
+.result-text p { font-size: 1rem; color: #ddd; margin-bottom: 20px; text-align: center; line-height: 1.6; }
+
+/* 小游戏 */
+#screen-miniGame { padding: 0; background: #000; }
+#minigame-container { width: 100%; height: 100%; }
+
+/* 结局 */
+#screen-ending { background: linear-gradient(135deg, #1a1a2e, #0f3460); }
+.ending-container { text-align: center; padding: 30px; }
+.ending-emoji { font-size: 4rem; margin-bottom: 15px; }
+.ending-title { font-size: 1.8rem; margin-bottom: 15px; color: #4ecdc4; }
+.ending-desc { font-size: 0.95rem; line-height: 1.7; color: #ccc; margin-bottom: 25px; max-width: 320px; }
+.ending-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 25px; font-size: 0.85rem; color: #aaa; }
+
+/* 存档界面 */
+#screen-saveLoad { background: #1a1a2e; justify-content: flex-start; padding-top: 60px; }
+.save-title { font-size: 1.3rem; margin-bottom: 20px; }
+.save-slot { width: 100%; max-width: 320px; padding: 16px; margin: 8px 0; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid #333; cursor: pointer; text-align: left; color: #ddd; transition: all 0.2s; }
+.save-slot:hover { border-color: #4ecdc4; }
+.save-slot-empty { color: #666; font-style: italic; }
+.save-actions { margin-top: 20px; display: flex; gap: 10px; }
+
+/* 游戏菜单 */
+#game-menu { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+#game-menu.active { display: flex; }
+</style>
+</head>
+<body>
+
+<!-- 标题画面 -->
+<div id="screen-title" class="screen" style="display:flex;">
+  <div class="title-logo">🐟</div>
+  <div class="title-name">实习摸鱼记</div>
+  <div class="title-sub">30天实习生存指南</div>
+  <button class="btn btn-primary" onclick="startNewGame()">新游戏</button>
+  <button class="btn btn-secondary" onclick="showSaveLoad('load')">继续游戏</button>
+  <button class="btn btn-secondary" onclick="showSaveLoad('manage')">存档管理</button>
+</div>
+
+<!-- 角色选择 -->
+<div id="screen-charSelect" class="screen">
+  <div class="char-title">选择你的角色</div>
+  <div class="char-options">
+    <div class="char-card char-card-male" onclick="game.startNew('male')">
+      <div class="char-emoji">👨‍💻</div>
+      <div class="char-name">余默</div>
+      <div class="char-desc">座右铭：能躺绝不坐<br>特长：假装在忙</div>
+    </div>
+    <div class="char-card char-card-female" onclick="game.startNew('female')">
+      <div class="char-emoji">👩‍💻</div>
+      <div class="char-name">俞闲</div>
+      <div class="char-desc">座右铭：准点下班是底线<br>特长：带薪发呆</div>
+    </div>
+  </div>
+</div>
+
+<!-- 游戏主界面 -->
+<div id="screen-game" class="screen">
+  <button class="game-menu-btn" onclick="toggleGameMenu()">☰</button>
+  <div id="status-bar"></div>
+  <div id="event-container"></div>
+</div>
+
+<!-- 小游戏 -->
+<div id="screen-miniGame" class="screen">
+  <div id="minigame-container"></div>
+</div>
+
+<!-- 结局 -->
+<div id="screen-ending" class="screen"></div>
+
+<!-- 存档界面 -->
+<div id="screen-saveLoad" class="screen">
+  <div class="save-title" id="save-title">存档管理</div>
+  <div id="save-slots"></div>
+  <div class="save-actions">
+    <button class="btn btn-secondary" onclick="closeSaveLoad()" style="width:auto;padding:10px 25px;">返回</button>
+  </div>
+</div>
+
+<!-- 游戏内菜单 -->
+<div id="game-menu">
+  <button class="btn btn-primary" onclick="resumeGame()">继续游戏</button>
+  <button class="btn btn-secondary" onclick="saveGame()">手动存档</button>
+  <button class="btn btn-secondary" onclick="backToTitleFromMenu()">返回标题</button>
+</div>
+
+<script>
+const EVENTS_V2_PART1 = {
+  // Day 1: 5/20 周三 - 520情人节 + 入职日
+  day1: {
+    morning: [
+      {
+        id: 'd1_m1',
+        text: '520情人节这天入职，安检大哥扫了你工牌后露出意味深长的微笑。HR小姐姐在大厅等你："520来报到！缘分啊~"旁边经过的同事纷纷侧目，你感觉自己像被全公司围观的单身狗。',
+        choices: [
+          { text: '尴尬但礼貌微笑', effects: { fishing: 0, performance: 2, happy: 1, social: 3 } },
+          { text: '自嘲"注孤生报到"', effects: { fishing: 2, performance: 0, happy: 4, social: 5 } },
+          { text: '低头快步走别看我', effects: { fishing: 3, performance: -1, happy: -1, social: -2 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd1_m2',
+        gender: 'male',
+        text: '领工牌时HR说"今天入职的都是有缘人"，旁边还有个同时入职的实习生——工牌上写着"俞闲"。她随口说了句"520入职也是没谁了"，旁边几个正式员工都笑了。',
+        choices: [
+          { text: '跟着笑"确实离谱"', effects: { fishing: 0, performance: 0, happy: 3, social: 4 } },
+          { text: '假装没听到', effects: { fishing: 1, performance: 1, happy: 1, social: 2 } },
+          { text: '"至少发了巧克力"', effects: { fishing: 2, performance: -1, happy: 5, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd1_m2f',
+        gender: 'female',
+        text: '领工牌时HR说"今天入职的都是有缘人"，旁边还有个同时入职的男生实习生——"余默"。他看起来比你还紧张，连工牌都挂反了。你好心提醒了他一句。',
+        choices: [
+          { text: '"工牌反了哦"', effects: { fishing: 0, performance: 0, happy: 2, social: 4 } },
+          { text: '假装没看到别社交了', effects: { fishing: 2, performance: 1, happy: 1, social: 0 } },
+          { text: '"520入职，我们真是命苦"', effects: { fishing: 1, performance: -1, happy: 4, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd1_n1',
+        gender: 'female',
+        text: '食堂今天搞了个"520情人节特餐"——心形牛排、粉色甜点。你一个人端着餐盘有点尴尬。好在余默也是一个人，你俩互相看到了，自然而然坐一起吐槽："520还得上班，资本家没有心。"',
+        choices: [
+          { text: '一起吐槽公司', effects: { fishing: 1, performance: 0, happy: 4, social: 5 } },
+          { text: '点外卖回工位吃', effects: { fishing: 4, performance: 1, happy: 0, social: -2 } },
+          { text: '厚脸皮点双人套餐自己吃', effects: { fishing: 3, performance: -1, happy: 5, social: 1 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd1_n1m',
+        gender: 'male',
+        text: '食堂今天搞了个"520情人节特餐"——心形牛排、粉色甜点。你一个人端着餐盘格格不入。导师路过拍你肩膀："别站着，跟我们坐。"一桌全是组里的人，你开始了第一顿社交午饭。',
+        choices: [
+          { text: '努力融入聊天', effects: { fishing: -1, performance: 1, happy: 2, social: 5 } },
+          { text: '闷头吃饭少说话', effects: { fishing: 2, performance: 0, happy: 0, social: 1 } },
+          { text: '找机会问组里的情况', effects: { fishing: -1, performance: 2, happy: 1, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd1_a1',
+        text: '导师带你到工位，全新MacBook已经摆好了。"先装环境吧，wiki有文档。"你正准备开工，行政姐姐推着小车过来发巧克力："520福利~每人一盒！"导师接过巧克力看了你一眼："装环境还是吃巧克力，你选。"',
+        choices: [
+          { text: '先装环境再说', effects: { fishing: -5, performance: 7, happy: -1, social: 0 } },
+          { text: '边吃巧克力边装', effects: { fishing: 3, performance: 3, happy: 4, social: 0 } },
+          { text: '分巧克力给周围同事', effects: { fishing: 1, performance: 0, happy: 3, social: 6 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd1_a2',
+        text: '装环境到一半卡住了，报了个从没见过的错。你google了半天没结果，俞闲从后面探过头来："这个我刚踩过坑，要改个配置文件。"她顺手帮你解决了。',
+        choices: [
+          { text: '"谢谢！回头请你喝奶茶"', effects: { fishing: 0, performance: 2, happy: 3, social: 5 } },
+          { text: '记下解决方法认真学', effects: { fishing: -3, performance: 5, happy: 1, social: 2 } },
+          { text: '"大佬带带我"', effects: { fishing: 2, performance: 1, happy: 2, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // Day 2: 5/21 周四 - 正式上班第一天
+  day2: {
+    morning: [
+      {
+        id: 'd2_m1',
+        text: '正式上班第一天！闹钟响了三遍，你从床上弹起来看了眼时间——8:47。公司9点打卡通勤40分钟，数学告诉你已经迟到了。但你想起HR说过"弹性打卡9:30前都行"。',
+        choices: [
+          { text: '慢悠悠地出门', effects: { fishing: 5, performance: -3, happy: 4, social: 0 } },
+          { text: '狂飙赶9点到', effects: { fishing: -5, performance: 5, happy: -3, social: 0 } },
+          { text: '打车！实习工资先预支', effects: { fishing: -1, performance: 3, happy: 0, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd2_m2',
+        text: '第一次参加早会，所有人轮流说昨天做了什么、今天要做什么。轮到你——你昨天就装了个环境还吃了盒巧克力，说什么好呢？',
+        choices: [
+          { text: '"熟悉项目环境中"', effects: { fishing: 3, performance: 2, happy: 1, social: 0 } },
+          { text: '如实说只装了环境', effects: { fishing: -2, performance: 3, happy: -1, social: 2 } },
+          { text: '"学习了很多收获很大"', effects: { fishing: 4, performance: -1, happy: 2, social: 1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd2_n1',
+        text: '午休时间你开始探索办公区。茶水间有免费零食和咖啡机，尽头有个安静角落连监控都照不到。你的摸鱼雷达疯狂作响——这简直是带薪休息的天堂！',
+        choices: [
+          { text: '记住这个宝藏位置', effects: { fishing: 6, performance: -2, happy: 5, social: 0 } },
+          { text: '老实在工位午休', effects: { fishing: -3, performance: 3, happy: 0, social: 0 } },
+          { text: '拉余默一起去探索', effects: { fishing: 3, performance: -1, happy: 3, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd2_a1',
+        text: '导师甩过来一个链接："先看看这个项目文档，大概200页，有问题随时问。"打开一看——密密麻麻的技术文档，上次更新是两年前。俞闲路过瞄了一眼："哈，这文档我当初也看了一周。"',
+        choices: [
+          { text: '逐字逐句看文档', effects: { fishing: -7, performance: 8, happy: -4, social: 0 } },
+          { text: '直接看代码更快', effects: { fishing: -2, performance: 5, happy: 0, social: 0 } },
+          { text: '开着文档实际摸鱼', effects: { fishing: 8, performance: -5, happy: 4, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // Day 3: 5/22 周五 - 第一个周五，触发小游戏
+  day3: {
+    morning: [
+      {
+        id: 'd3_m1',
+        text: '周五！空气里弥漫着快乐的分子。早会上leader突然说："趁这周大家都在，开个需求规划会吧。"产品经理开始口若悬河地画饼——"下季度要做行业第一""用户量翻倍""AI赋能一切"。',
+        choices: [
+          { text: '认真听记笔记', effects: { fishing: -4, performance: 5, happy: -2, social: 1 } },
+          { text: '表面认真实则放空', effects: { fishing: 5, performance: -1, happy: 3, social: 0 } },
+          { text: '偷偷和余默对视翻白眼', effects: { fishing: 3, performance: -2, happy: 4, social: 4 } },
+        ],
+        triggerMiniGame: 'bubble',
+      }
+    ],
+    noon: [
+      {
+        id: 'd3_n1',
+        text: '中午大家聊起周末计划，办公区的摸鱼氛围已经开始升温了。有人在偷偷看机票，有人已经开始收拾包，虽然才12点。余默说他周末要打游戏通宵，俞闲说约了朋友去看展。',
+        choices: [
+          { text: '加入周末话题闲聊', effects: { fishing: 4, performance: -2, happy: 4, social: 5 } },
+          { text: '趁大家聊天偷偷午睡', effects: { fishing: 5, performance: -1, happy: 3, social: 0 } },
+          { text: '利用午休多写点代码', effects: { fishing: -5, performance: 6, happy: -2, social: -1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd3_a1',
+        text: '周五下午3点，办公区安静得诡异。你偷偷环顾四周：左边在逛淘宝，右边在看小说，对面把游戏窗口调成了IDE大小。这就是传说中的"周五下午，人在心不在"。',
+        choices: [
+          { text: '加入摸鱼大军', effects: { fishing: 8, performance: -5, happy: 6, social: 2 } },
+          { text: '提前完成下周任务', effects: { fishing: -6, performance: 8, happy: 0, social: 0 } },
+          { text: '帮同事挡着然后一起摸', effects: { fishing: 5, performance: -2, happy: 5, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // Day 4: 5/23 周六 ★周末
+  day4: {
+    morning: [
+      {
+        id: 'd4_m1',
+        text: '实习后的第一个周末！你睡到阳光晒屁股才醒，看了眼手机——11点。外面天气不错，但被窝更香。你伸了个懒腰，感受着不用打卡的幸福感。',
+        choices: [
+          { text: '继续躺着刷手机', effects: { fishing: 7, performance: -3, happy: 6, social: 0 } },
+          { text: '起来做个早午餐', effects: { fishing: 3, performance: 0, happy: 4, social: 0 } },
+          { text: '出门觅食顺便逛逛', effects: { fishing: 2, performance: 0, happy: 5, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd4_n1',
+        text: '正当你享受周末时光，手机突然震了——导师发来消息："在吗？"互联网打工人最怕的两个字出现了！你的心跳加速，是有bug？还是要加班？还是……',
+        choices: [
+          { text: '秒回"在的！"', effects: { fishing: -4, performance: 5, happy: -3, social: 1 } },
+          { text: '假装没看到', effects: { fishing: 6, performance: -4, happy: 2, social: -2 } },
+          { text: '等5分钟再回', effects: { fishing: 2, performance: 2, happy: 0, social: 0 } },
+        ],
+        triggerMiniGame: 'decode',
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd4_a1',
+        text: '解码完消息，原来导师只是让你周一记得把昨天的代码push一下，虚惊一场。剩下的周六下午是属于你的！实习生群里有人在约下午打球，也有人说在家打游戏。',
+        choices: [
+          { text: '出门打球社交', effects: { fishing: 2, performance: 0, happy: 5, social: 6 } },
+          { text: '宅家打游戏', effects: { fishing: 6, performance: -2, happy: 6, social: 1 } },
+          { text: '提前看看下周的需求', effects: { fishing: -5, performance: 6, happy: -1, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // Day 5: 5/24 周日 ★周末
+  day5: {
+    morning: [
+      {
+        id: 'd5_m1',
+        text: '周日早上，你在"周日恐惧症"和"今天还能浪"之间反复横跳。打开手机看到实习生群里有人发了周末加班的照片，配文"卷不动了"。你有一点点内疚，但身体很诚实地没动。',
+        choices: [
+          { text: '关掉手机继续躺', effects: { fishing: 7, performance: -4, happy: 5, social: -1 } },
+          { text: '回一句"辛苦了大佬"', effects: { fishing: 4, performance: -1, happy: 2, social: 3 } },
+          { text: '有点焦虑打开电脑学习', effects: { fishing: -5, performance: 6, happy: -3, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd5_n1',
+        text: '中午点了外卖窝在沙发上看剧。突然想起还没有整理这周的工作笔记，导师说周一要聊聊这周的收获。是现在整理还是明天早上再说？',
+        choices: [
+          { text: '明天再说继续看剧', effects: { fishing: 6, performance: -3, happy: 5, social: 0 } },
+          { text: '花半小时简单整理', effects: { fishing: -2, performance: 4, happy: 1, social: 0 } },
+          { text: '发消息问俞闲怎么写', effects: { fishing: 1, performance: 2, happy: 2, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd5_a1',
+        text: '周日下午四点，"明天要上班"的现实感越来越强。你开始纠结要不要提前准备一下明天的工作，还是把最后的自由时光用在快乐的事情上。余默在群里发："有人明天要一起坐地铁吗？"',
+        choices: [
+          { text: '约余默明天一起通勤', effects: { fishing: 1, performance: 1, happy: 2, social: 5 } },
+          { text: '抓紧最后时光打游戏', effects: { fishing: 6, performance: -3, happy: 5, social: 0 } },
+          { text: '早睡早起明天精神好', effects: { fishing: -3, performance: 5, happy: 0, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // Day 6: 5/25 周一
+  day6: {
+    morning: [
+      {
+        id: 'd6_m1',
+        text: '周一清晨，闹钟是世界上最残忍的发明。你在被窝里和自己谈判了15分钟才爬起来。到公司茶水间排满了冲咖啡的人，每个人脸上都写着四个大字：不想上班。',
+        choices: [
+          { text: '咖啡续命后再说', effects: { fishing: 3, performance: 1, happy: 1, social: 2 } },
+          { text: '打起精神先开工', effects: { fishing: -4, performance: 5, happy: -2, social: 0 } },
+          { text: '在工位发呆十分钟', effects: { fishing: 5, performance: -3, happy: 2, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd6_n1',
+        text: '午饭时观察到有趣现象：周一中午所有人说话声音比平时小，笑容少了50%，叹气频率上升200%。食堂阿姨都看出来了："小伙子咋蔫了？多打点肉给你。"',
+        choices: [
+          { text: '感谢阿姨多吃点', effects: { fishing: 2, performance: 0, happy: 4, social: 2 } },
+          { text: '和同事吐槽周一', effects: { fishing: 3, performance: -1, happy: 2, social: 4 } },
+          { text: '默默吃完回去干活', effects: { fishing: -2, performance: 3, happy: -1, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd6_a1',
+        text: '下午收到三封邮件：产品改需求了、测试环境挂了、leader约你明天聊聊。你感觉周末攒的快乐值瞬间清零。余默看你脸色不好："别慌，leader找你聊可能是好事。"',
+        choices: [
+          { text: '先处理最紧急的事', effects: { fishing: -5, performance: 7, happy: -2, social: 0 } },
+          { text: '去茶水间缓缓再说', effects: { fishing: 4, performance: -2, happy: 2, social: 1 } },
+          { text: '问余默要不要一起加班', effects: { fishing: 1, performance: 2, happy: 1, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd6_o1',
+        text: '7点了，工位上还亮着不少灯。你的任务还没做完，旁边同事已经点了外卖准备持久战。估计还要一两个小时。',
+        choices: [
+          { text: '效率拉满速战速决', effects: { fishing: -6, performance: 8, happy: -2, social: 0 } },
+          { text: '慢慢磨摸鱼式加班', effects: { fishing: 5, performance: 2, happy: 1, social: 0 } },
+          { text: '问同事要不要拼外卖', effects: { fishing: 2, performance: 1, happy: 3, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd6_o2m',
+        gender: 'male',
+        text: '加班到一半，leader路过看了眼你的屏幕："还行，进度不错。对了那个服务器要搬一下机器，你明天帮个忙呗，搬几台主机。"好家伙，码农还得当搬运工。',
+        choices: [
+          { text: '"好的没问题"', effects: { fishing: -2, performance: 4, happy: -2, social: 3 } },
+          { text: '"我腰不好..."', effects: { fishing: 3, performance: -1, happy: 2, social: -1 } },
+          { text: '"可以叫个快递吧"', effects: { fishing: 2, performance: 0, happy: 1, social: 1 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd6_o2f',
+        gender: 'female',
+        text: '加班到8点，导师看你还在就走过来："差不多了就回去吧，一个女孩子太晚不安全。"虽然是好意，但你看了看旁边加班的男同事们——凭什么他们就不用被催回家。',
+        choices: [
+          { text: '坚持做完再走', effects: { fishing: -3, performance: 5, happy: 0, social: 1 } },
+          { text: '顺水推舟收拾回家', effects: { fishing: 4, performance: -2, happy: 4, social: 0 } },
+          { text: '"放心，我打车回"', effects: { fishing: 0, performance: 3, happy: 1, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // Day 7: 5/26 周二
+  day7: {
+    morning: [
+      {
+        id: 'd7_m1',
+        text: '代码review日！你昨天提交的PR被标了一堆comment，导师在review里写："这里为什么这么写？""变量命名不规范""逻辑可以简化"。你数了数，23条comment。心态微崩。',
+        choices: [
+          { text: '虚心一条条改', effects: { fishing: -5, performance: 7, happy: -2, social: 1 } },
+          { text: '先找导师当面聊', effects: { fishing: -2, performance: 5, happy: 0, social: 4 } },
+          { text: '心态炸了先摸会鱼', effects: { fishing: 6, performance: -4, happy: 3, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd7_n1',
+        text: '午饭时跟俞闲吐槽被review虐的经历。她笑着说："我第一个PR被打回了三次才过，习惯就好。导师严格是好事，说明把你当正式员工培养。"你心情好了一点。',
+        choices: [
+          { text: '"被你一说感觉好多了"', effects: { fishing: 1, performance: 1, happy: 4, social: 5 } },
+          { text: '"三次？那我还好……"', effects: { fishing: 2, performance: 0, happy: 2, social: 3 } },
+          { text: '默默决定下午好好改', effects: { fishing: -3, performance: 4, happy: 1, social: 1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd7_a1',
+        text: '下午埋头改review的comment，改到第18条时你发现导师自己的代码也有同样的问题。你截了个图犹豫了一下——要不要发出来？',
+        choices: [
+          { text: '私聊导师委婉提一下', effects: { fishing: -1, performance: 4, happy: 2, social: 3 } },
+          { text: '当没看见默默改完', effects: { fishing: 0, performance: 3, happy: 0, social: 0 } },
+          { text: '截图发摸鱼群吐槽', effects: { fishing: 5, performance: -3, happy: 4, social: 3 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // Day 8: 5/27 周三
+  day8: {
+    morning: [
+      {
+        id: 'd8_m1',
+        text: '早会上导师说："有个新需求分给你，不复杂，评估一下工作量。"你打开需求文档——8页。产品经理说"很简单就是加个按钮"。经验告诉你，凡是说"简单"的都不简单。',
+        choices: [
+          { text: '认真评估给真实时间', effects: { fishing: -3, performance: 6, happy: 0, social: 2 } },
+          { text: '随口说"两天吧"', effects: { fishing: 4, performance: -3, happy: 1, social: 0 } },
+          { text: '多报一倍时间留余量', effects: { fishing: 5, performance: 2, happy: 3, social: -1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd8_n1',
+        text: '午休时研究新需求，越看越发现坑——涉及三个系统联动、两种边界情况没说清、还要兼容旧版本。你开始后悔早上随口给的排期。余默看你愁眉苦脸："怎么了？需求有坑？"',
+        choices: [
+          { text: '找余默一起分析', effects: { fishing: 0, performance: 4, happy: 2, social: 5 } },
+          { text: '自己硬啃不麻烦人', effects: { fishing: -4, performance: 5, happy: -2, social: 0 } },
+          { text: '先不想了午睡一会', effects: { fishing: 5, performance: -2, happy: 3, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd8_a1',
+        text: '下午产品过来追进度："这个需求能不能提前一天？老板催了。"你内心os：昨天才接的需求今天就催？这是程序员不是魔法师啊。',
+        choices: [
+          { text: '"我尽量"（内心崩溃）', effects: { fishing: -4, performance: 5, happy: -3, social: 1 } },
+          { text: '摆事实讲道理拒绝', effects: { fishing: -1, performance: 4, happy: 2, social: 0 } },
+          { text: '"要不你帮我挡一下？"', effects: { fishing: 3, performance: 2, happy: 1, social: 3 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd8_o1',
+        text: '为了赶进度你决定加会班。7点的办公室，空调已经关了，暖气哄哄的。你打开代码，旁边只剩俞闲也在加班。她递过来一袋零食："撑住，写完一起走。"',
+        choices: [
+          { text: '效率拉满赶紧写完', effects: { fishing: -5, performance: 7, happy: 0, social: 2 } },
+          { text: '边聊天边写慢慢来', effects: { fishing: 3, performance: 2, happy: 4, social: 5 } },
+          { text: '算了明天再说先走了', effects: { fishing: 6, performance: -4, happy: 3, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // Day 9: 5/28 周四
+  day9: {
+    morning: [
+      {
+        id: 'd9_m1',
+        text: '导师在日历上约了1v1。你心里有点慌——是不是摸鱼被发现了？还是代码写得太烂？走进会议室，导师笑着说："别紧张，聊聊你来两周的感受和成长计划。"',
+        choices: [
+          { text: '"挺好的学到很多"', effects: { fishing: 2, performance: 2, happy: 1, social: 2 } },
+          { text: '诚实聊困惑和想法', effects: { fishing: -3, performance: 5, happy: 0, social: 4 } },
+          { text: '"还在适应中"', effects: { fishing: 1, performance: 1, happy: 0, social: 1 } },
+        ],
+        triggerMiniGame: 'bubble',
+      }
+    ],
+    noon: [
+      {
+        id: 'd9_n1',
+        text: '1v1结束了，导师说你进步不错但要注意代码质量，还提了下半年可能有转正机会。你坐在工位消化信息——被肯定的开心和"要更努力"的压力混合在一起。',
+        choices: [
+          { text: '斗志满满立刻干活', effects: { fishing: -5, performance: 6, happy: 1, social: 0 } },
+          { text: '先吃午饭消化心情', effects: { fishing: 3, performance: -1, happy: 3, social: 0 } },
+          { text: '找余默聊聊转正的事', effects: { fishing: 1, performance: 1, happy: 2, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd9_a1',
+        text: '下午开始写代码，状态意外地好——导师的肯定好像给你打了鸡血。正写得起劲，旁边的产品经理凑过来："在忙？占你五分钟。"你知道产品的"五分钟"至少半小时。',
+        choices: [
+          { text: '戴上耳机假装没听到', effects: { fishing: 5, performance: 3, happy: 2, social: -3 } },
+          { text: '"说吧什么事"', effects: { fishing: -2, performance: 3, happy: -1, social: 3 } },
+          { text: '"五分钟哦我计时了"', effects: { fishing: 1, performance: 2, happy: 3, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd9_o1',
+        text: '6:30了，你的代码今天差一点就能提交。是多写20分钟搞定，还是明天再说？俞闲在收拾东西准备走了，问你："要不要一起去吃个饭？"',
+        choices: [
+          { text: '搞定代码再走', effects: { fishing: -4, performance: 6, happy: -1, social: -2 } },
+          { text: '走！明天再写', effects: { fishing: 4, performance: -2, happy: 4, social: 5 } },
+          { text: '"等我十分钟！"', effects: { fishing: -1, performance: 4, happy: 3, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // Day 10: 5/29 周五
+  day10: {
+    morning: [
+      {
+        id: 'd10_m1',
+        text: '又到周五！你的摸鱼技能经过两周修炼已经今非昔比——学会了"屏幕分割术"（左边代码右边视频）、"假装思考术"（其实在发呆）、"战略性上厕所"（一去就是20分钟）。',
+        choices: [
+          { text: '今天全面施展摸鱼术', effects: { fishing: 8, performance: -5, happy: 7, social: 0 } },
+          { text: '周五也认真写代码', effects: { fishing: -5, performance: 7, happy: -1, social: 0 } },
+          { text: '上午干活下午放飞', effects: { fishing: 4, performance: 3, happy: 4, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd10_n1',
+        text: 'HR在大群发了通知：明天组织团建！可选A组"爬山健行"、B组"剧本杀"或C组"聚餐唱K"。群里炸了，大家开始站队。余默选了剧本杀，俞闲选了爬山。',
+        choices: [
+          { text: '选爬山（和俞闲一组）', effects: { fishing: 1, performance: 1, happy: 3, social: 5 } },
+          { text: '选剧本杀（和余默推理）', effects: { fishing: 4, performance: 0, happy: 5, social: 4 } },
+          { text: '选聚餐唱K（最轻松）', effects: { fishing: 5, performance: -1, happy: 5, social: 3 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd10_a1',
+        text: '周五下午3点，整层楼的摸鱼指数达到峰值。有人已经在讨论明天团建穿什么、带什么，工作群消息几乎为零。导师也在看手机，你俩对视一笑——心照不宣。',
+        choices: [
+          { text: '光明正大开始摸鱼', effects: { fishing: 7, performance: -4, happy: 6, social: 2 } },
+          { text: '趁别人摸鱼偷偷卷', effects: { fishing: -6, performance: 8, happy: 0, social: -1 } },
+          { text: '加入团建讨论群聊', effects: { fishing: 4, performance: -1, happy: 4, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // Day 11: 5/30 周六 ★周末（团建日）
+  day11: {
+    morning: [
+      {
+        id: 'd11_m1',
+        text: '团建日！虽然是周末但要早起集合，闹钟响的时候你一度怀疑人生。到了集合点发现大家都顶着黑眼圈，唯一精神的是HR——毕竟是她组织的。导师递来一杯咖啡："撑住，今天可以合法摸鱼。"',
+        choices: [
+          { text: '打起精神享受团建', effects: { fishing: 2, performance: 1, happy: 4, social: 5 } },
+          { text: '找个角落半摸半参与', effects: { fishing: 5, performance: -1, happy: 3, social: 2 } },
+          { text: '积极组织活动刷存在感', effects: { fishing: -3, performance: 4, happy: 2, social: 7 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd11_n1',
+        text: '团建午餐是BBQ，大家围着烤架有说有笑。平时不怎么说话的同事都打开了话匣子，八卦从公司趣事聊到个人感情。有人起哄让你表演个才艺。',
+        choices: [
+          { text: '大方表演一个', effects: { fishing: 0, performance: 2, happy: 4, social: 7 } },
+          { text: '害羞推辞"我不会"', effects: { fishing: 3, performance: 0, happy: 1, social: 1 } },
+          { text: '转移话题cue别人', effects: { fishing: 2, performance: 1, happy: 3, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd11_n2m',
+        gender: 'male',
+        text: 'BBQ后有人组了篮球赛。你平时不怎么运动，但几个同事拉你："三缺一！"对面队leader亲自上场，感觉输了要被穿小鞋。',
+        choices: [
+          { text: '硬着头皮上', effects: { fishing: -1, performance: 1, happy: 3, social: 6 } },
+          { text: '当计分员就好', effects: { fishing: 3, performance: 0, happy: 2, social: 3 } },
+          { text: '喊"让实习生先走"', effects: { fishing: 4, performance: -1, happy: 4, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd11_n2f',
+        gender: 'female',
+        text: 'BBQ后女同事们自然凑在一起聊天。话题从"哪个组加班最少"聊到"食堂哪家最好吃"再到"公司附近哪家奶茶店最赞"。你第一次觉得自己不是外人了。',
+        choices: [
+          { text: '积极贡献奶茶情报', effects: { fishing: 2, performance: 0, happy: 5, social: 6 } },
+          { text: '默默听八卦就好', effects: { fishing: 3, performance: 0, happy: 3, social: 3 } },
+          { text: '趁机打听哪个组好转正', effects: { fishing: 0, performance: 2, happy: 1, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd11_a1',
+        text: '团建刚结束，导师突然在群里发了条消息："各位注意，今晚零点618开门红启动，需要on-call待命，有问题及时响应。"你看了看手机——才下午4点，今晚还得熬？',
+        choices: [
+          { text: '回家先补个觉再熬夜', effects: { fishing: 4, performance: 2, happy: 2, social: 0 } },
+          { text: '去公司和大家一起守', effects: { fishing: -3, performance: 5, happy: 1, social: 5 } },
+          { text: '"实习生也要on-call？"', effects: { fishing: 3, performance: -1, happy: 2, social: 3 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // Day 12: 5/31 周日 ★周末
+  day12: {
+    morning: [
+      {
+        id: 'd12_m1',
+        text: '周日被手机震醒——工作群炸了！618开门红今天零点启动，实时战报刷屏："零点GMV破X亿！"导师发消息："注意盯着系统，有问题随时响应。"你揉着惺忪的眼打开电脑。',
+        choices: [
+          { text: '赶紧登录看监控', effects: { fishing: -5, performance: 7, happy: -2, social: 0 } },
+          { text: '先看战报凑热闹', effects: { fishing: 3, performance: 1, happy: 4, social: 2 } },
+          { text: '回"收到"继续睡', effects: { fishing: 6, performance: -4, happy: 5, social: -2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd12_n1',
+        text: '开门红数据表现不错，群里一片欢腾。leader发了红包庆祝首战告捷。但有个小告警——某个接口响应变慢了，暂时没影响用户，要不要主动排查？',
+        choices: [
+          { text: '主动排查拿功劳', effects: { fishing: -5, performance: 8, happy: 0, social: 3 } },
+          { text: '没出事先不管', effects: { fishing: 5, performance: -2, happy: 3, social: 0 } },
+          { text: '报告导师让他决定', effects: { fishing: 0, performance: 3, happy: 1, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd12_a1',
+        text: '下午开门红势头平稳，导师说"可以松口气了"。实习生群里有人发截图：朋友圈都在晒618战报，搞得好像自己参与了什么了不起的战役。周日就这么被开门红占据了。',
+        choices: [
+          { text: '发朋友圈蹭热度', effects: { fishing: 4, performance: 0, happy: 3, social: 5 } },
+          { text: '关掉电脑去休息', effects: { fishing: 5, performance: -2, happy: 6, social: 0 } },
+          { text: '复盘学习大促经验', effects: { fishing: -3, performance: 5, happy: 1, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [],
+    evening: [
+      {
+        id: 'd12_e1',
+        text: '19:50，开门红晚8点场即将开始！作战大屏上GMV数字不断跳动，旁边有人在喊"马上破亿了！"导师发消息："你负责的那个模块流量马上冲上来，注意告警。"',
+        choices: [
+          { text: '打起十二分精神盯着', effects: { fishing: -6, performance: 8, happy: -2, social: 0 } },
+          { text: '看战报激动得想发朋友圈', effects: { fishing: 3, performance: 1, happy: 5, social: 4 } },
+          { text: '偷偷打开购物车趁优惠下单', effects: { fishing: 7, performance: -4, happy: 6, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    midnight: [
+      {
+        id: 'd12_mid1',
+        text: '23:50！距离5/31开门红收官还有10分钟。大屏数字在冲最后一波，整层楼灯火通明。有人开始鼓掌倒计时，有人在狂刷群消息。你的监控面板一片绿——没出问题，稳了！',
+        choices: [
+          { text: '加入倒计时一起嗨', effects: { fishing: 3, performance: 2, happy: 7, social: 6 } },
+          { text: '默默截图留念这一刻', effects: { fishing: 2, performance: 1, happy: 5, social: 2 } },
+          { text: '趁没人注意溜去休息', effects: { fishing: 6, performance: -3, happy: 4, social: -2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+  day13: {
+    morning: [
+      {
+        id: 'd13_m1',
+        text: '六一儿童节！一进公司就看见前台摆了一堆零食大礼包，上面贴着"祝各位大龄儿童节日快乐"。你领了一大袋零食回工位，感觉今天的工作幸福感直接拉满。',
+        choices: [
+          { text: '边吃零食边摸鱼', effects: { fishing: 6, performance: -3, happy: 6, social: 0 } },
+          { text: '分享零食给周围人', effects: { fishing: 1, performance: 0, happy: 4, social: 6 } },
+          { text: '收好零食先干活', effects: { fishing: -3, performance: 5, happy: 1, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd13_m2',
+        text: '早会上leader说："今天儿童节，大家开心就好。"然后画风一转："不过那个需求还是要按时交哈。"你在心里给leader的表情打了个差评。',
+        choices: [
+          { text: '苦笑着说"好的"', effects: { fishing: 2, performance: 2, happy: -1, social: 1 } },
+          { text: '"今天过节能不能宽限"', effects: { fishing: 4, performance: -2, happy: 3, social: 2 } },
+          { text: '默默算了算进度还行', effects: { fishing: 0, performance: 3, happy: 1, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd13_n1',
+        text: '午休时间有人在茶水间组队打switch——"儿童节就要回归童年！"马里奥赛车已经开了两轮，欢呼声从走廊那头传来。你的手指已经开始痒了，但下午还有个需求评审。',
+        choices: [
+          { text: '加入打游戏！', effects: { fishing: 7, performance: -4, happy: 7, social: 5 } },
+          { text: '看别人打过过眼瘾', effects: { fishing: 4, performance: -1, happy: 3, social: 3 } },
+          { text: '利用午休准备评审', effects: { fishing: -5, performance: 6, happy: -2, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd13_a1',
+        text: '下午需求评审开始了——产品经理在讲一个新功能，PPT做了30页。你发现有个逻辑漏洞但不确定要不要提出来，毕竟今天是儿童节大家都想早点散会。',
+        choices: [
+          { text: '提出来！专业第一', effects: { fishing: -4, performance: 7, happy: -1, social: 2 } },
+          { text: '会后私聊产品说', effects: { fishing: -1, performance: 5, happy: 1, social: 3 } },
+          { text: '算了不是我的活', effects: { fishing: 5, performance: -3, happy: 2, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd13_o1',
+        text: '评审完已经快6点了。产品说"那个漏洞确实要改方案，辛苦开发评估一下"。你看了看日历——六一儿童节竟然要加班？余默在旁边幽幽地说："成年人的儿童节，就是假装自己不是成年人然后继续加班。"',
+        choices: [
+          { text: '留下来评估完再走', effects: { fishing: -4, performance: 6, happy: -2, social: 1 } },
+          { text: '明天再说今天过节！', effects: { fishing: 5, performance: -3, happy: 4, social: 0 } },
+          { text: '和余默边聊边评估', effects: { fishing: 1, performance: 3, happy: 3, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // Day 14: 6/2 周二
+  day14: {
+    morning: [
+      {
+        id: 'd14_m1',
+        text: '开始进入日常开发节奏了。你打开IDE，昨天的代码还停在一半，今天目标是把核心逻辑写完。刚准备进入心流状态，企业微信弹了个窗——产品约你"对齐一下需求细节"。',
+        choices: [
+          { text: '先写半小时再去', effects: { fishing: -1, performance: 4, happy: 1, social: 0 } },
+          { text: '马上去省得一直惦记', effects: { fishing: -3, performance: 5, happy: -1, social: 2 } },
+          { text: '回"下午可以吗"', effects: { fishing: 4, performance: -1, happy: 2, social: -1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd14_n1',
+        text: '午饭时俞闲问你实习到现在感觉怎么样。"就……一边觉得在学东西，一边觉得自己在摸鱼，很矛盾。"她笑："正常，大家都这样。重要的是你到底想从这段实习里得到什么。"',
+        choices: [
+          { text: '"想留下来转正"', effects: { fishing: -2, performance: 3, happy: 1, social: 3 } },
+          { text: '"想多体验少内耗"', effects: { fishing: 3, performance: 0, happy: 4, social: 3 } },
+          { text: '"其实还没想清楚"', effects: { fishing: 1, performance: 1, happy: 0, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd14_a1',
+        text: '下午写代码写得顺，进入了心流状态。突然发现隔壁组在开会讨论很大声，你的思路被打断了。带上降噪耳机发现没电了。你需要找个安静的地方继续。',
+        choices: [
+          { text: '去之前发现的宝藏角落', effects: { fishing: 4, performance: 3, happy: 3, social: 0 } },
+          { text: '忍着噪音继续写', effects: { fishing: -2, performance: 4, happy: -2, social: 0 } },
+          { text: '约俞闲去咖啡厅写代码', effects: { fishing: 2, performance: 2, happy: 3, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // Day 15: 6/3 周三 - 实习中期，开始变老油条
+  day15: {
+    morning: [
+      {
+        id: 'd15_m1',
+        text: '实习快过半了，你发现自己已经掌握了这家公司的生存法则：早会说"在做了"万能回复、会议靠"这个需要再评估"拖延、午休多10分钟没人管。你开始理解什么叫"老油条的智慧"。',
+        choices: [
+          { text: '享受老油条的快乐', effects: { fishing: 7, performance: -3, happy: 5, social: 1 } },
+          { text: '警醒自己不能太懈怠', effects: { fishing: -4, performance: 6, happy: -1, social: 0 } },
+          { text: '张弛有度适度摸鱼', effects: { fishing: 3, performance: 3, happy: 4, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd15_n1',
+        text: '午饭时余默说他要跳槽了，下个月就走。你有点惊讶——"不是刚来半年吗？"他笑着说："互联网没有铁饭碗，有好机会就跳呗。"俞闲在旁边默默点头。',
+        choices: [
+          { text: '"祝你顺利！"', effects: { fishing: 1, performance: 0, happy: 1, social: 4 } },
+          { text: '问他新公司什么情况', effects: { fishing: 3, performance: -1, happy: 2, social: 3 } },
+          { text: '突然开始思考自己的未来', effects: { fishing: 0, performance: 2, happy: -1, social: 1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd15_a1',
+        text: '下午leader突然在群里@全员："今天下午4点临时开个会，关于下半年规划。"群里瞬间安静——临时全员会一般没好事。你看了看余默，他耸耸肩："反正我要走了。"',
+        choices: [
+          { text: '认真准备听会内容', effects: { fishing: -3, performance: 5, happy: -1, social: 1 } },
+          { text: '先打听一下什么情况', effects: { fishing: 2, performance: 1, happy: 0, social: 4 } },
+          { text: '"不管了先把手头的做完"', effects: { fishing: 1, performance: 4, happy: 1, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd15_o1',
+        text: '会上leader宣布组织架构要调整，具体方案下周公布。散会后大家三三两两聊着猜测。你作为实习生不太确定这对自己意味着什么，但氛围明显有点微妙。俞闲拍了拍你的肩："别想太多，做好手头的事就行。"',
+        choices: [
+          { text: '听俞闲的安心做事', effects: { fishing: -2, performance: 4, happy: 2, social: 3 } },
+          { text: '有点焦虑想多了解情况', effects: { fishing: 2, performance: 1, happy: -2, social: 3 } },
+          { text: '管他呢到点下班', effects: { fishing: 5, performance: -2, happy: 3, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  }
+};
+
+window.EVENTS_V2_PART1 = EVENTS_V2_PART1;
+
+// 实习摸鱼记 - 重构事件数据 V2（第16-30天）+ 随机事件
+// 男主：余默  女主：俞闲
+// 时间线：2026年5月20日-6月18日，共30天
+// Day 16-30 对应 6/4-6/18，第四周进入618冲刺
+
+const EVENTS_V2_PART2 = {
+
+  // ===== Day 16: 6/4 周四 - 普通工作日，开始听说618 =====
+  day16: {
+    morning: [
+      {
+        id: 'd16_m1',
+        text: '早上刚坐下，群里已经炸了——"618作战方案"的文档链接转了三圈。余默点开一看，密密麻麻的排期表，实习生那一栏赫然写着"待定"。隐约感觉暴风雨要来了。',
+        choices: [
+          { text: '仔细研读方案', effects: { fishing: -3, performance: 5, happy: -1, social: 0 } },
+          { text: '关掉假装没看见', effects: { fishing: 4, performance: -2, happy: 3, social: 0 } },
+          { text: '问同事啥情况', effects: { fishing: 0, performance: 1, happy: 0, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd16_n1',
+        text: '中午实习生约了聚餐吃火锅。锅还没开就有人提议玩真心话大冒险——话题从"你偷偷摸鱼被抓几次"聊到"你觉得谁最可能转正"。气氛热烈。',
+        choices: [
+          { text: '积极参与', effects: { fishing: 2, performance: -1, happy: 5, social: 6 } },
+          { text: '默默吃肉当观众', effects: { fishing: 1, performance: 0, happy: 3, social: 2 } },
+          { text: '主动帮大家涮菜', effects: { fishing: 0, performance: 0, happy: 4, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd16_n2m',
+        gender: 'male',
+        text: '火锅局上，几个男实习生开始互相挤兑："你上次摸鱼看的什么？"有人翻出你的屏幕截图——上次看球赛的证据被保存了。大家起哄："下次请客！"',
+        choices: [
+          { text: '认栽请一轮奶茶', effects: { fishing: 1, performance: 0, happy: 3, social: 6 } },
+          { text: '"你们谁没摸过鱼？"', effects: { fishing: 3, performance: -1, happy: 4, social: 4 } },
+          { text: '假装生气实则社交', effects: { fishing: 2, performance: 0, happy: 3, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd16_n2f',
+        gender: 'female',
+        text: '火锅局上不知谁起的头，话题转到了"公司里谁最帅"。有人问你怎么看，你觉得这种话题在职场聚餐里出现特别无语。隔壁那桌的男同事们在聊游戏。',
+        choices: [
+          { text: '敷衍一句转移话题', effects: { fishing: 1, performance: 0, happy: 1, social: 3 } },
+          { text: '"我只关心谁能带我转正"', effects: { fishing: 0, performance: 2, happy: 3, social: 4 } },
+          { text: '不评价，专心吃毛肚', effects: { fishing: 3, performance: 0, happy: 4, social: 1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd16_a1',
+        text: '导师叫余默过去，神情严肃地说："618前有几个页面需要你来搞，复杂度不高但时间紧。"随手甩过来一个需求清单，足足八项。余默面不改色心在滴血。',
+        choices: [
+          { text: '立刻开始干活', effects: { fishing: -5, performance: 7, happy: -2, social: 0 } },
+          { text: '先排优先级', effects: { fishing: -2, performance: 5, happy: 0, social: 0 } },
+          { text: '问能不能砍需求', effects: { fishing: 1, performance: 2, happy: 2, social: 3 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd16_o1',
+        text: '六点半了，工位上灯火通明没人走。余默探头看了看——果然，618效应已经开始了。导师还在开会，表情像是在渡劫。',
+        choices: [
+          { text: '留下多干一会', effects: { fishing: -4, performance: 5, happy: -2, social: 2 } },
+          { text: '趁没人注意溜了', effects: { fishing: 5, performance: -3, happy: 4, social: -1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // ===== Day 17: 6/5 周五 - 有618氛围的周五 =====
+  day17: {
+    morning: [
+      {
+        id: 'd17_m1',
+        text: '周五本该是快乐的，但今天的站会上导师宣布："从下周开始进入618战时状态，周末可能需要on-call。"整个会议室一片死寂，只有空调在嗡嗡作响。',
+        choices: [
+          { text: '主动报名值班', effects: { fishing: -5, performance: 7, happy: -3, social: 5 } },
+          { text: '低头假装记笔记', effects: { fishing: 3, performance: 0, happy: 1, social: -1 } },
+          { text: '偷看俞闲反应', effects: { fishing: 2, performance: -1, happy: 3, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd17_n1',
+        text: '午休时间，余默在工位刷手机摸鱼。突然导师从背后走过，吓得他差点把手机甩出去。还好屏幕及时切回了IDE——虽然上面的代码三小时没动过一行。',
+        choices: [
+          { text: '赶紧写两行代码', effects: { fishing: -3, performance: 3, happy: -1, social: 0 } },
+          { text: '镇定自若装专注', effects: { fishing: 4, performance: 0, happy: 2, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd17_a1',
+        text: '下午三点，有人在群里喊"今天周五能不能早走"。导师秒回："今天的活今天结，做完就可以走。"余默看了看自己的任务清单——还有三个没开始的需求。逃不掉了。',
+        choices: [
+          { text: '拼命赶工冲刺', effects: { fishing: -6, performance: 8, happy: -2, social: 0 } },
+          { text: '做最紧急的那个', effects: { fishing: -2, performance: 4, happy: 0, social: 0 } },
+          { text: '假装做完先跑', effects: { fishing: 6, performance: -5, happy: 5, social: -2 } },
+        ],
+        triggerMiniGame: 'run',
+      }
+    ],
+    overtime: [
+      {
+        id: 'd17_o1',
+        text: '七点了，周五的办公室依然灯火通明。余默发现俞闲也还在——她正对着一份数据报表眉头紧锁。这是帮忙的好机会，还是赶紧跑路？',
+        choices: [
+          { text: '过去帮忙', effects: { fishing: -3, performance: 3, happy: 2, social: 7 } },
+          { text: '各走各的先撤', effects: { fishing: 3, performance: 0, happy: 2, social: -1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // ===== Day 18: 6/6 周六 ★周末 =====
+  day18: {
+    morning: [
+      {
+        id: 'd18_m1',
+        text: '周六早上十点，余默还在被窝里做着不用上班的美梦。手机震了一下——导师发来消息："在吗？有个紧急问题需要排查。"美梦碎了一地。',
+        choices: [
+          { text: '秒回并起床', effects: { fishing: -5, performance: 6, happy: -4, social: 3 } },
+          { text: '假装没看到', effects: { fishing: 6, performance: -4, happy: 3, social: -3 } },
+          { text: '回复稍等一会', effects: { fishing: 2, performance: 2, happy: 0, social: 1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd18_n1',
+        text: '中午了，余默在家点了外卖。吃着吃着刷到实习群里的消息——有人已经去公司加班了，发了张空荡办公室的照片配文"卷王报到"。余默手里的鸡腿突然不香了。',
+        choices: [
+          { text: '也去公司加班', effects: { fishing: -6, performance: 6, happy: -3, social: 3 } },
+          { text: '安心吃完再说', effects: { fishing: 4, performance: -1, happy: 4, social: 0 } },
+          { text: '在群里回个表情', effects: { fishing: 2, performance: 0, happy: 1, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd18_a1',
+        text: '周六下午，阳光正好。余默纠结着是出门逛逛还是在家学点东西为618做准备。窗外传来楼下孩子的笑声，电脑里是还没看完的技术文档。',
+        choices: [
+          { text: '出门散心', effects: { fishing: 5, performance: -2, happy: 6, social: 2 } },
+          { text: '在家学习备战', effects: { fishing: -4, performance: 5, happy: -1, social: 0 } },
+          { text: '打游戏放松', effects: { fishing: 6, performance: -3, happy: 5, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // ===== Day 19: 6/7 周日 ★周末 =====
+  day19: {
+    morning: [
+      {
+        id: 'd19_m1',
+        text: '周日早上，难得睡到自然醒。余默躺在床上刷朋友圈——同学们在旅游、聚会、打球，而自己明天又要回去面对618的修罗场。焦虑和摆烂在脑海中激烈交战。',
+        choices: [
+          { text: '提前预习下周任务', effects: { fishing: -5, performance: 5, happy: -2, social: 0 } },
+          { text: '今天就是要躺平', effects: { fishing: 6, performance: -2, happy: 5, social: 0 } },
+          { text: '约朋友出去玩', effects: { fishing: 4, performance: -1, happy: 6, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd19_n1',
+        text: '中午追剧追到一半，俞闲突然发来消息："明天618备战正式开始，你那边准备得怎么样了？"配了个紧张的表情包。余默看了看自己的进度——好像还差亿点点。',
+        choices: [
+          { text: '老实回复没准备好', effects: { fishing: 0, performance: 1, happy: -1, social: 4 } },
+          { text: '逞强说没问题', effects: { fishing: 0, performance: 0, happy: 0, social: 2 } },
+          { text: '约她一起复习', effects: { fishing: -3, performance: 4, happy: 3, social: 7 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd19_a1',
+        text: '周日下午，最后的自由时光。余默望着窗外的夕阳，心想下周开始就是地狱模式了。冰箱里还有昨天买的啤酒，电脑里还有没打完的游戏。要不要来个最后的狂欢？',
+        choices: [
+          { text: '尽情享受最后的自由', effects: { fishing: 7, performance: -3, happy: 7, social: 0 } },
+          { text: '早睡养精蓄锐', effects: { fishing: -2, performance: 3, happy: 1, social: 0 } },
+          { text: '整理下周工作清单', effects: { fishing: -4, performance: 5, happy: -1, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // ===== Day 20: 6/8 周一 - 618倒计时10天，需求暴增 =====
+  day20: {
+    morning: [
+      {
+        id: 'd20_m1',
+        text: '周一早上，余默被拉进了三个新群："618技术保障群""618值班群""618作战室"。每个群都在疯狂跳消息，未读999+。这阵势，比高考还恐怖。',
+        choices: [
+          { text: '挨个群看完消息', effects: { fishing: -4, performance: 4, happy: -3, social: 3 } },
+          { text: '全部设为免打扰', effects: { fishing: 5, performance: -4, happy: 3, social: -2 } },
+          { text: '只看@自己的', effects: { fishing: 1, performance: 2, happy: 0, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd20_n1',
+        text: '午饭时间被压缩到二十分钟。余默端着盒饭回到工位，发现待办列表又多了四项新需求，每一项都标着"P0-紧急"。他怀疑产品经理是不是把键盘上的P0键按坏了。',
+        choices: [
+          { text: '闷头逐个击破', effects: { fishing: -6, performance: 7, happy: -3, social: 0 } },
+          { text: '找导师确认优先级', effects: { fishing: -2, performance: 4, happy: 0, social: 3 } },
+          { text: '偷偷delay两个', effects: { fishing: 4, performance: -3, happy: 2, social: -1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd20_a1',
+        text: '下午的会议一个接一个。余默在第三个会上开始神游——产品经理在讲第五版方案，设计在反复改稿，而他需要在明天前完成开发。这不是人干的活。',
+        choices: [
+          { text: '专注听会记要点', effects: { fishing: -3, performance: 5, happy: -2, social: 2 } },
+          { text: '偷偷在下面写代码', effects: { fishing: 3, performance: 3, happy: 1, social: -1 } },
+          { text: '假装网络卡退出', effects: { fishing: 6, performance: -4, happy: 4, social: -3 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd20_o1',
+        text: '晚上九点，618倒计时10天。整层楼灯火通明，外卖盒堆成小山。余默的眼睛盯着屏幕都快冒烟了，但进度条才走了60%。旁边的正式员工淡定地说："这才哪到哪，等着吧。"',
+        choices: [
+          { text: '继续肝到完成', effects: { fishing: -6, performance: 8, happy: -5, social: 1 } },
+          { text: '先回去明天早来', effects: { fishing: 3, performance: -1, happy: 3, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // ===== Day 21: 6/9 周二 - 高强度开发，bug频出 =====
+  day21: {
+    morning: [
+      {
+        id: 'd21_m1',
+        text: '一大早就收到测试的消息：昨天提交的代码有bug，用户头像在iOS上显示成马赛克。余默打开一看，原来是图片压缩参数写错了。赶紧修，赶紧修！',
+        choices: [
+          { text: '火速修复上线', effects: { fishing: -5, performance: 7, happy: -1, social: 0 } },
+          { text: '先分析根因再修', effects: { fishing: -3, performance: 5, happy: 0, social: 0 } },
+          { text: '甩锅给后端接口', effects: { fishing: 3, performance: -2, happy: 2, social: -4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd21_n1',
+        text: '刚修完一个bug，又来一个：下单页面在特定条件下会白屏。更要命的是——这个代码不是余默写的，但导师说"你顺手看看"。顺手？这分明是接盘。',
+        choices: [
+          { text: '认命接手排查', effects: { fishing: -4, performance: 6, happy: -3, social: 2 } },
+          { text: '委婉推回给原作者', effects: { fishing: 2, performance: 0, happy: 1, social: -2 } },
+          { text: '找俞闲一起看', effects: { fishing: -1, performance: 3, happy: 2, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd21_a1',
+        text: '下午代码评审会上，余默的PR被资深开发挑出了五个问题。虽然都是小事，但当着全组人的面被指出来，脸还是有点烫。俞闲投来同情的目光。',
+        choices: [
+          { text: '虚心接受马上改', effects: { fishing: -3, performance: 5, happy: -1, social: 3 } },
+          { text: '据理力争解释', effects: { fishing: 0, performance: 2, happy: 0, social: -1 } },
+          { text: '心态崩了想摸鱼', effects: { fishing: 5, performance: -3, happy: -2, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd21_o1',
+        text: '加班到八点半，终于把今天的bug全清了。余默伸了个懒腰，发现俞闲还在旁边埋头苦干。她的屏幕上是一个复杂的数据看板——618实时监控大屏。',
+        choices: [
+          { text: '邀她一起吃宵夜', effects: { fishing: 2, performance: 0, happy: 4, social: 7 } },
+          { text: '默默收拾走人', effects: { fishing: 2, performance: 0, happy: 1, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // ===== Day 22: 6/10 周三 - 转正面谈/绩效讨论 =====
+  day22: {
+    morning: [
+      {
+        id: 'd22_m1',
+        text: '导师一早发消息："今天下午两点来会议室聊聊。"就这一句话，没有上下文。你的心跳瞬间加速——是转正面谈？是绩效谈话？还是要被优化了？整个上午都在忐忑中度过。',
+        choices: [
+          { text: '紧张到什么都干不了', effects: { fishing: 4, performance: -3, happy: -4, social: 0 } },
+          { text: '用工作转移注意力', effects: { fishing: -3, performance: 4, happy: -1, social: 0 } },
+          { text: '找老实习生打听', effects: { fishing: 1, performance: 0, happy: 0, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd22_n1m',
+        gender: 'male',
+        text: '午饭时几个实习生聚在一起讨论面谈的事。有人说就是聊感受，有人说会问转正意愿。余默已经聊过了："问了三个问题，答完就让走了，别紧张。"',
+        choices: [
+          { text: '追问是哪三个问题', effects: { fishing: 1, performance: 2, happy: 1, social: 4 } },
+          { text: '假装不在意继续吃饭', effects: { fishing: 0, performance: 0, happy: -1, social: 0 } },
+          { text: '找导师提前了解情况', effects: { fishing: -2, performance: 3, happy: 1, social: 3 } },
+        ],
+        triggerMiniGame: null,
+      },
+      {
+        id: 'd22_n1f',
+        gender: 'female',
+        text: '午饭时组里姐姐看你心不在焉，说："面谈别紧张，就是HR走流程的。上次有个实习生紧张得把水杯打翻了，你只要不打翻水杯就赢了。"你被逗笑了。',
+        choices: [
+          { text: '问问还有啥注意的', effects: { fishing: 1, performance: 2, happy: 2, social: 4 } },
+          { text: '放松了不少', effects: { fishing: 1, performance: 0, happy: 3, social: 2 } },
+          { text: '午饭都吃不下还是紧张', effects: { fishing: 2, performance: -1, happy: -2, social: 1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd22_a1',
+        text: '面谈开始了。导师拿出一张评估表，上面写着各种维度的分数。他慢悠悠地说："整体还行，但618这波如果表现好的话……"后面的话被他故意留白了。标准的画饼话术！',
+        choices: [
+          { text: '表态会全力以赴', effects: { fishing: -4, performance: 6, happy: -1, social: 3 } },
+          { text: '追问具体标准', effects: { fishing: -1, performance: 3, happy: 1, social: 2 } },
+          { text: '微笑点头心里吐槽', effects: { fishing: 2, performance: 0, happy: 2, social: 1 } },
+        ],
+        triggerMiniGame: 'bubble',
+      }
+    ],
+    overtime: [
+      {
+        id: 'd22_o1',
+        text: '面谈结束，余默回到工位消化了一下。画饼归画饼，但如果618真能好好表现，转正应该没问题。就是这个"好好表现"到底要多好……算了，先干活。',
+        choices: [
+          { text: '被激励到加班冲刺', effects: { fishing: -5, performance: 6, happy: 1, social: 0 } },
+          { text: '想通了准时走', effects: { fishing: 3, performance: 0, happy: 3, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // ===== Day 23: 6/11 周四 - 618大促系统压测 =====
+  day23: {
+    morning: [
+      {
+        id: 'd23_m1',
+        text: '今天是618大促系统压测日。全组人盯着监控大屏，QPS曲线像过山车一样起伏。余默负责的页面突然响应超时了，红色告警闪了起来——完了！',
+        choices: [
+          { text: '冷静排查问题', effects: { fishing: -5, performance: 8, happy: -2, social: 0 } },
+          { text: '慌张求助导师', effects: { fishing: -2, performance: 3, happy: -3, social: 3 } },
+          { text: '祈祷自己恢复', effects: { fishing: 3, performance: -5, happy: -1, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd23_n1',
+        text: '压测暂停午休。余默终于找到了超时的原因——一个循环里的数据库查询没有做缓存，在高并发下直接把连接池打满了。修复不难，但想到这个bug差点在618当天炸掉，后背一阵冷汗。',
+        choices: [
+          { text: '修完顺便优化全链路', effects: { fishing: -6, performance: 8, happy: 0, social: 0 } },
+          { text: '只修这个点', effects: { fishing: -2, performance: 4, happy: 1, social: 0 } },
+          { text: '吃个午饭再说', effects: { fishing: 3, performance: 0, happy: 3, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd23_a1',
+        text: '下午继续压测，这次余默的模块稳如老狗。导师在大屏前满意地点了点头，对他竖了个大拇指。虽然只是一个小动作，但余默感觉整个世界都亮了。',
+        choices: [
+          { text: '继续监控不放松', effects: { fishing: -3, performance: 5, happy: 2, social: 0 } },
+          { text: '偷偷摸会鱼', effects: { fishing: 5, performance: -1, happy: 4, social: 0 } },
+          { text: '帮同事看问题', effects: { fishing: -2, performance: 3, happy: 2, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd23_o1',
+        text: '压测结束总结会上，CTO宣布："整体达标，但还有几个模块需要优化。周末可能需要加一轮。"余默的心情从云端跌到谷底——又是一个加班的周末预告。',
+        choices: [
+          { text: '主动认领优化任务', effects: { fishing: -5, performance: 7, happy: -3, social: 4 } },
+          { text: '低调混过不接活', effects: { fishing: 4, performance: -1, happy: 2, social: -1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // ===== Day 24: 6/12 周五 - 618前最后一个周五 =====
+  day24: {
+    morning: [
+      {
+        id: 'd24_m1',
+        text: '周五早上，HR在群里发了618值班排表。余默往下一划——6月16号晚班、6月17号通宵班、6月18号全天。好家伙，安排得明明白白。这是实习还是服兵役？',
+        choices: [
+          { text: '默默接受安排', effects: { fishing: -2, performance: 3, happy: -3, social: 1 } },
+          { text: '找HR问能不能换班', effects: { fishing: 1, performance: 0, happy: 0, social: 2 } },
+          { text: '在群里发表情包自嘲', effects: { fishing: 2, performance: -1, happy: 3, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd24_n1',
+        text: '中午一群人讨论618值班零食采购清单。有人要红牛，有人要泡面，余默说要一箱咖啡。俞闲在旁边补了一句"再来点巧克力"，然后对余默眨了眨眼。',
+        choices: [
+          { text: '帮她多点巧克力', effects: { fishing: 1, performance: 0, happy: 3, social: 6 } },
+          { text: '问她要什么口味', effects: { fishing: 0, performance: 0, happy: 2, social: 5 } },
+          { text: '专心吃饭不搭话', effects: { fishing: 0, performance: 0, happy: 0, social: -1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd24_a1',
+        text: '下午四点，余默看了眼时间。按理说周五应该能早走，但环顾四周没人有收拾的意思。有个同事已经在订晚餐了——显然今天走不了了。',
+        choices: [
+          { text: '认命留下继续干', effects: { fishing: -4, performance: 5, happy: -2, social: 1 } },
+          { text: '做完手头的就走', effects: { fishing: 2, performance: 2, happy: 2, social: 0 } },
+          { text: '和同事约个饭再加班', effects: { fishing: 0, performance: 2, happy: 2, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd24_o1',
+        text: '晚上八点，余默提交了最后一行代码。618前的开发任务终于全部完成了！虽然代码质量可能有点糙，但至少功能都跑通了。他长舒一口气，感觉像打完了一场仗。',
+        choices: [
+          { text: '自测一遍再走', effects: { fishing: -3, performance: 5, happy: 0, social: 0 } },
+          { text: '直接提交跑路', effects: { fishing: 4, performance: -2, happy: 4, social: 0 } },
+          { text: '叫上俞闲一起走', effects: { fishing: 1, performance: 0, happy: 3, social: 6 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // ===== Day 25: 6/13 周六 ★周末 - 被召回加班 =====
+  day25: {
+    morning: [
+      {
+        id: 'd25_m1',
+        text: '周六早上八点，手机疯狂震动。导师在群里@所有人："压测发现新问题，相关同学今天到公司处理。"余默看了看窗外的阳光，心里默念三遍"我不去我不去"——但已经点开了打车APP。',
+        choices: [
+          { text: '乖乖去公司', effects: { fishing: -6, performance: 7, happy: -4, social: 3 } },
+          { text: '回复不是我的模块', effects: { fishing: 4, performance: -2, happy: 2, social: -3 } },
+          { text: '磨蹭到中午再去', effects: { fishing: 2, performance: 1, happy: 0, social: -1 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd25_n1',
+        text: '周六的公司格外安静，只有618相关的几组人在。余默发现公司贴心地准备了免费午餐——虽然只是盒饭，但有种"卖命换盒饭"的荒诞感。俞闲也来了，坐在对面默默吃饭。',
+        choices: [
+          { text: '吐槽周末加班', effects: { fishing: 2, performance: 0, happy: 2, social: 4 } },
+          { text: '讨论618技术方案', effects: { fishing: -2, performance: 4, happy: 0, social: 3 } },
+          { text: '安静吃饭各干各的', effects: { fishing: 0, performance: 1, happy: 0, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd25_a1',
+        text: '下午三点，问题终于解决了。导师说可以先走，但明天可能还要来。余默看着空荡的办公室，有种说不出的疲惫——这还没到618呢，已经这么卷了。',
+        choices: [
+          { text: '回去好好休息', effects: { fishing: 5, performance: -1, happy: 4, social: 0 } },
+          { text: '顺便多做点预案', effects: { fishing: -4, performance: 5, happy: -2, social: 0 } },
+          { text: '约俞闲出去逛逛', effects: { fishing: 3, performance: -1, happy: 5, social: 7 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // ===== Day 26: 6/14 周日 ★周末 - 618倒计时4天 =====
+  day26: {
+    morning: [
+      {
+        id: 'd26_m1',
+        text: '周日早上，余默在半梦半醒间摸到手机——好消息，导师没发消息；坏消息，群里有人说下午要再对一遍上线checklist。618倒计时4天，空气里都是紧张的味道。',
+        choices: [
+          { text: '上午先休息下午再说', effects: { fishing: 4, performance: 0, happy: 3, social: 0 } },
+          { text: '提前对好自己的部分', effects: { fishing: -3, performance: 4, happy: -1, social: 0 } },
+          { text: '假装没看到消息', effects: { fishing: 5, performance: -3, happy: 2, social: -2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd26_n1',
+        text: '中午在家吃了碗泡面，俞闲发来消息："下午的checklist会议你参加吗？"附带一个猫猫叹气的表情包。看来她也不想去，但又不得不去。同是天涯加班人啊。',
+        choices: [
+          { text: '回复一起线上参加', effects: { fishing: -1, performance: 2, happy: 1, social: 5 } },
+          { text: '说自己的部分已经OK', effects: { fishing: 2, performance: 1, happy: 1, social: 2 } },
+          { text: '提议明天到公司再说', effects: { fishing: 3, performance: -1, happy: 2, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd26_a1',
+        text: '下午checklist会议远程进行。余默负责的三个功能点全部通过，导师难得表扬了一句"不错"。会后余默关上电脑，告诉自己：这是618前最后的休息了，好好珍惜。',
+        choices: [
+          { text: '出门放风解压', effects: { fishing: 5, performance: -1, happy: 6, social: 2 } },
+          { text: '在家看电影放松', effects: { fishing: 4, performance: 0, happy: 4, social: 0 } },
+          { text: '再检查一遍代码', effects: { fishing: -4, performance: 4, happy: -1, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: []
+  },
+
+  // ===== Day 27: 6/15 周一 - 618预热正式开始 =====
+  day27: {
+    morning: [
+      {
+        id: 'd27_m1',
+        text: '周一早上八点，余默破天荒地提前半小时到公司。大屏幕上已经挂出了"618作战指挥中心"的实时数据看板，红色倒计时显示"距618还有3天"。全员进入战时状态，连厕所都贴上了鼓劲标语。',
+        choices: [
+          { text: '热血沸腾全力备战', effects: { fishing: -6, performance: 8, happy: 1, social: 2 } },
+          { text: '内心毫无波动', effects: { fishing: 2, performance: 0, happy: 0, social: 0 } },
+          { text: '拍照发朋友圈', effects: { fishing: 3, performance: -1, happy: 3, social: 3 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd27_n1',
+        text: '午饭取消堂食改发盒饭，所有人在工位边吃边干。余默啃着鸡腿盯着监控面板——618预热活动零点刚上线，流量比预期高了30%，系统有点吃紧。',
+        choices: [
+          { text: '放下鸡腿开始优化', effects: { fishing: -5, performance: 7, happy: -2, social: 0 } },
+          { text: '先吃完再说', effects: { fishing: 2, performance: 0, happy: 2, social: 0 } },
+          { text: '汇报情况给导师', effects: { fishing: -1, performance: 3, happy: 0, social: 3 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd27_a1',
+        text: '下午两点，突然一阵骚动——有个促销页面挂了！PM在群里@所有前端："页面白屏了谁来看一下！！！"三个感叹号直接把余默的血压拉满。虽然不是他负责的页面，但……',
+        choices: [
+          { text: '主动帮忙排查', effects: { fishing: -5, performance: 7, happy: -1, social: 6 } },
+          { text: '确认不是自己的再说', effects: { fishing: 1, performance: 1, happy: 1, social: 0 } },
+          { text: '趁乱摸一会鱼', effects: { fishing: 5, performance: -3, happy: 3, social: -2 } },
+        ],
+        triggerMiniGame: 'run',
+      }
+    ],
+    overtime: [
+      {
+        id: 'd27_o1',
+        text: '晚上十点，值班排班正式生效。余默今晚不用值班，但看着留守的同事们一个个红着眼睛盯屏幕，有种奇怪的内疚感。俞闲发消息："你先回去，明天你的班。"',
+        choices: [
+          { text: '留下来陪值班', effects: { fishing: -5, performance: 4, happy: -2, social: 6 } },
+          { text: '听劝先回去休息', effects: { fishing: 3, performance: 1, happy: 2, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // ===== Day 28: 6/16 周二 - 618倒计时，紧急bug修复 =====
+  day28: {
+    morning: [
+      {
+        id: 'd28_m1',
+        text: '早上刚到工位就看到钉钉消息99+。昨晚值班的同事留了一堆问题——两个P0 bug、一个数据异常、还有一个"偶发白屏待观察"。余默的晨间好心情瞬间蒸发。',
+        choices: [
+          { text: '先处理P0 bug', effects: { fishing: -6, performance: 8, happy: -3, social: 0 } },
+          { text: '喝杯咖啡定定神', effects: { fishing: 1, performance: 1, happy: 1, social: 0 } },
+          { text: '拉群讨论分工', effects: { fishing: -2, performance: 4, happy: 0, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd28_n1',
+        text: 'P0 bug修到一半，发现是个跨模块的问题——需要后端配合改接口。但后端同事正在处理另一个更紧急的线上问题。余默发消息催了三遍，对面已读不回。618的混乱真实上演。',
+        choices: [
+          { text: '直接走过去面对面沟通', effects: { fishing: -3, performance: 5, happy: -1, social: 3 } },
+          { text: '先绕过去用临时方案', effects: { fishing: 0, performance: 3, happy: 0, social: 0 } },
+          { text: '在群里升级给导师', effects: { fishing: -1, performance: 2, happy: -1, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd28_a1',
+        text: '下午四点，所有P0问题终于清零。618倒计时大屏上数字跳到了"2天"。导师拍了拍余默的肩："今晚你值班到12点，能顶住吗？"',
+        choices: [
+          { text: '拍胸脯保证没问题', effects: { fishing: -4, performance: 6, happy: -1, social: 4 } },
+          { text: '老实说有点虚', effects: { fishing: 0, performance: 2, happy: 0, social: 3 } },
+          { text: '问能不能找人搭班', effects: { fishing: 1, performance: 1, happy: 1, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [
+      {
+        id: 'd28_o1',
+        text: '晚上值班开始了。余默和另一个实习生盯着监控面板，每隔十分钟刷新一次数据。一切平稳。俞闲发来消息："还顺利吗？我给你带了咖啡放前台了。"',
+        choices: [
+          { text: '去拿咖啡顺便回个谢', effects: { fishing: 1, performance: 0, happy: 5, social: 6 } },
+          { text: '回复没事让她早点睡', effects: { fishing: 0, performance: 1, happy: 2, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // ===== Day 29: 6/17 周三 - 618前夜，通宵值班 =====
+  day29: {
+    morning: [
+      {
+        id: 'd29_m1',
+        text: '618前一天。整个办公室弥漫着一种"暴风雨前的平静"——所有代码冻结，不允许任何上线操作。余默反而闲下来了，但精神上却绷得很紧，像等待发令枪响的运动员。',
+        choices: [
+          { text: '反复检查自己的代码', effects: { fishing: -3, performance: 4, happy: -1, social: 0 } },
+          { text: '趁机补觉攒体力', effects: { fishing: 5, performance: -1, happy: 3, social: 0 } },
+          { text: '和团队对齐应急方案', effects: { fishing: -2, performance: 3, happy: 0, social: 4 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd29_n1',
+        text: '中午公司请全员吃了大餐——据说是"618誓师宴"。满桌子菜还有水果饮料，气氛既热闹又紧张。大领导上台讲话："今晚通宵值班，明天就是决战！"掌声响起，余默默默鼓掌，心想怎么感觉像进了传销大会。',
+        choices: [
+          { text: '认真听讲群情激昂', effects: { fishing: -2, performance: 3, happy: 1, social: 3 } },
+          { text: '埋头猛吃免费大餐', effects: { fishing: 3, performance: 0, happy: 5, social: 1 } },
+          { text: '和俞闲偷偷吐槽', effects: { fishing: 2, performance: -1, happy: 4, social: 5 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd29_a1',
+        text: '下午的时间过得异常缓慢。所有人都在等——等零点的钟声敲响，等618正式开始。导师让大家轮流去休息室眯一会儿，"晚上有硬仗要打"。余默的脑子里不断回响着各种"万一出问题怎么办"。',
+        choices: [
+          { text: '去休息室躺一会', effects: { fishing: 3, performance: 1, happy: 2, social: 0 } },
+          { text: '太紧张睡不着', effects: { fishing: 0, performance: 0, happy: -2, social: 0 } },
+          { text: '和同事聊天解压', effects: { fishing: 1, performance: 0, happy: 2, social: 4 } },
+        ],
+        triggerMiniGame: 'decode',
+      }
+    ],
+    overtime: [
+      {
+        id: 'd29_o1',
+        text: '晚上十一点，全员就位。办公室灯火通明如白昼，大屏幕上倒计时"距618还有1小时"。红牛见底了，键盘声此起彼伏。余默深吸一口气——决战时刻要来了。',
+        choices: [
+          { text: '全神贯注进入状态', effects: { fishing: -6, performance: 8, happy: 0, social: 2 } },
+          { text: '偷偷紧张发个朋友圈', effects: { fishing: 2, performance: 0, happy: 2, social: 3 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+
+  // ===== Day 30: 6/18 周四 - 618当天 + 实习最后一天 =====
+  day30: {
+    morning: [
+      {
+        id: 'd30_m1',
+        text: '凌晨零点，618大促正式开始！瞬间流量暴涨，监控曲线像火箭一样窜升。大屏上实时滚动着成交金额——10亿、20亿、50亿……整个办公室爆发出欢呼声。余默的页面承受住了峰值，心里那块石头终于落地了。',
+        choices: [
+          { text: '继续紧盯不敢松懈', effects: { fishing: -5, performance: 8, happy: 2, social: 2 } },
+          { text: '激动地和大家击掌', effects: { fishing: 0, performance: 2, happy: 6, social: 6 } },
+          { text: '偷偷松口气想补觉', effects: { fishing: 3, performance: 0, happy: 2, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    noon: [
+      {
+        id: 'd30_n1',
+        text: '中午，618战报出炉——销售额破纪录！领导在群里连发三个"好"字，PM激动得语音消息都在颤抖。庆祝的气氛弥漫在每个角落。余默和俞闲对视一笑——他们这些实习生也是这场大战的一份子。',
+        choices: [
+          { text: '由衷为团队开心', effects: { fishing: 0, performance: 3, happy: 7, social: 5 } },
+          { text: '心里想着加班费', effects: { fishing: 2, performance: 0, happy: 3, social: 0 } },
+          { text: '感叹终于结束了', effects: { fishing: 1, performance: 0, happy: 4, social: 2 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    afternoon: [
+      {
+        id: 'd30_a1',
+        text: '下午，618高峰已过，系统趋于平稳。余默突然想起——今天也是实习的最后一天。他看着自己的工位：贴满便利贴的显示器、喝了一半的咖啡、和俞闲一起买的桌面摆件。三十天就这样过去了。',
+        choices: [
+          { text: '认真写实习总结', effects: { fishing: -3, performance: 6, happy: 2, social: 3 } },
+          { text: '找每个人道别', effects: { fishing: 0, performance: 1, happy: 4, social: 8 } },
+          { text: '最后摸一次鱼纪念', effects: { fishing: 7, performance: -2, happy: 5, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    overtime: [],
+    evening: [
+      {
+        id: 'd30_e1',
+        text: '19:50，618晚8点大促高潮来了！第二波流量比零点更猛，大屏数字疯狂跳动。导师紧盯监控："撑住撑住，最后一波了！"整层楼的紧张感几乎凝成固体。这是你实习的最后一个晚高峰了。',
+        choices: [
+          { text: '全力以赴站好最后一班岗', effects: { fishing: -6, performance: 9, happy: 3, social: 3 } },
+          { text: '激动地录视频记录现场', effects: { fishing: 3, performance: 1, happy: 6, social: 4 } },
+          { text: '悄悄下单抢最后的优惠', effects: { fishing: 6, performance: -3, happy: 5, social: 0 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ],
+    midnight: [
+      {
+        id: 'd30_mid1',
+        text: '23:50，618收官倒计时！大屏最终定格在一个天文数字上，全场起立鼓掌！导师组织了庆功——几瓶啤酒、一些零食、还有一张写满签名的贺卡。"谢谢你这30天的付出。"俞闲举起杯子朝你笑。实习的最后10分钟，所有加班和摸鱼都变成了值得的回忆。',
+        choices: [
+          { text: '留下来庆祝到最后', effects: { fishing: 2, performance: 2, happy: 8, social: 9 } },
+          { text: '喝完这杯默默离开', effects: { fishing: 0, performance: 0, happy: 5, social: 3 } },
+          { text: '鼓起勇气问俞闲联系方式', effects: { fishing: 0, performance: 0, happy: 7, social: 10 } },
+        ],
+        triggerMiniGame: null,
+      }
+    ]
+  },
+};
+
+// ===== 随机事件池（15个，适用于任意时段）=====
+const RANDOM_EVENTS_V2 = [
+  {
+    id: 'r1',
+    text: '老板突然转身，目光直直地扫向你的屏幕。你的浏览器上还开着淘宝页面——虽然你辩称是"竞品调研"，但那个购物车图标出卖了你。',
+    choices: [
+      { text: '光速切换窗口', effects: { fishing: -3, performance: 1, happy: -3, social: 0 } },
+      { text: '淡定说在看竞品', effects: { fishing: 2, performance: -1, happy: 1, social: 0 } },
+      { text: '反问老板要不要拼单', effects: { fishing: 3, performance: -3, happy: 5, social: 2 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r2',
+    text: '全员大会临时通知！五分钟后在大会议室集合。余默连忙关掉正在看的小说网页，抓起笔记本冲过去——结果发现是HR讲企业文化。',
+    choices: [
+      { text: '认真听做笔记', effects: { fishing: -2, performance: 2, happy: -2, social: 2 } },
+      { text: '在下面偷偷玩手机', effects: { fishing: 5, performance: -2, happy: 3, social: -1 } },
+      { text: '找个角落打瞌睡', effects: { fishing: 4, performance: -1, happy: 2, social: -1 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r3',
+    text: 'HR突击检查工位！说是"5S评比"，实际就是看谁桌上零食最多。余默低头一看——三包辣条、两罐可乐、一袋瓜子，简直是零食铺。',
+    choices: [
+      { text: '火速塞进抽屉', effects: { fishing: 1, performance: 1, happy: 0, social: 0 } },
+      { text: '大方分享给同事', effects: { fishing: 2, performance: 0, happy: 2, social: 5 } },
+      { text: '假装是客户送的样品', effects: { fishing: 2, performance: -1, happy: 3, social: 1 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r4',
+    text: '隔壁帮你掩护摸鱼的小刘今天请假了！没有了"有人来了"的预警系统，余默今天得靠自己的第六感活下去了。失去战友的日子格外艰难。',
+    choices: [
+      { text: '今天老实干活', effects: { fishing: -4, performance: 4, happy: -1, social: 0 } },
+      { text: '在显示器贴后视镜', effects: { fishing: 4, performance: -1, happy: 3, social: 0 } },
+      { text: '找新的掩护盟友', effects: { fishing: 2, performance: 0, happy: 1, social: 3 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r5',
+    text: '快递到了！驿站发来取件通知。余默的心情瞬间从打工人变成了拆箱博主。但现在是工作时间，出去拿要十五分钟——得找个借口。',
+    choices: [
+      { text: '说去接杯水（绕道拿快递）', effects: { fishing: 4, performance: -2, happy: 4, social: 0 } },
+      { text: '忍到午休再去', effects: { fishing: -2, performance: 2, happy: -1, social: 0 } },
+      { text: '让同事帮忙带', effects: { fishing: 1, performance: 0, happy: 2, social: 3 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r6',
+    text: '外卖洒了！打开袋子的瞬间，酸辣粉的汤汁不受控制地洒了一桌。键盘、鼠标垫、文件——无一幸免。空气中弥漫着一股醋味，隔壁同事投来同情的目光。',
+    choices: [
+      { text: '立刻抢救键盘', effects: { fishing: -2, performance: 1, happy: -3, social: 0 } },
+      { text: '先自拍发朋友圈', effects: { fishing: 3, performance: -2, happy: 2, social: 3 } },
+      { text: '向IT借备用键盘', effects: { fishing: 0, performance: 0, happy: -1, social: 2 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r7',
+    text: '大佬在工作群里@了你："余默，你做的那个功能……"消息没打完就撤回了。余默盯着"对方撤回了一条消息"，心跳都要停了——是好事还是坏事？！',
+    choices: [
+      { text: '主动私聊问情况', effects: { fishing: -2, performance: 2, happy: -2, social: 3 } },
+      { text: '假装没看到', effects: { fishing: 2, performance: 0, happy: -1, social: -1 } },
+      { text: '紧张地自查代码', effects: { fishing: -3, performance: 3, happy: -3, social: 0 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r8',
+    text: '等电梯时，门开了——CEO走了出来。四目相对的瞬间，余默的脑子一片空白。大佬微微点了下头就走了，留下余默在原地回味：他是不是对我笑了？',
+    choices: [
+      { text: '镇定微笑打招呼', effects: { fishing: 0, performance: 2, happy: 1, social: 4 } },
+      { text: '低头假装看手机', effects: { fishing: 1, performance: 0, happy: -1, social: -1 } },
+      { text: '事后和同事炫耀', effects: { fishing: 2, performance: -1, happy: 3, social: 3 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r9',
+    text: '工位网络突然断了！WiFi图标打了个叉，代码推不上去，网页打不开。余默试了重启、换网线、重连VPN——都没用。这是上天赐予的合法摸鱼时间？',
+    choices: [
+      { text: '报修然后正当摸鱼', effects: { fishing: 6, performance: -1, happy: 5, social: 0 } },
+      { text: '用手机热点继续干活', effects: { fishing: -4, performance: 5, happy: -2, social: 0 } },
+      { text: '去其他工位蹭网', effects: { fishing: 1, performance: 2, happy: 0, social: 2 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r10',
+    text: '上厕所遇到排队，前面是隔壁组的老王。老王笑眯眯搭话："小余啊最近忙不忙？我们组有个活想借你用用。"这是陷阱还是机会？',
+    choices: [
+      { text: '热情表示可以帮忙', effects: { fishing: -2, performance: 3, happy: 0, social: 5 } },
+      { text: '委婉说要问导师', effects: { fishing: 1, performance: 1, happy: 0, social: 2 } },
+      { text: '假装肚子疼先溜了', effects: { fishing: 3, performance: 0, happy: 2, social: -2 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r11',
+    text: '茶水间角落发现一个隐藏零食柜！里面塞满了薯片、巧克力和各种小饼干，贴着"自取"的便利贴。余默眼睛放光——这难道就是传说中的"员工福利暗柜"？',
+    choices: [
+      { text: '拿两包就走', effects: { fishing: 2, performance: 0, happy: 4, social: 0 } },
+      { text: '带一把回去分给同事', effects: { fishing: 3, performance: -1, happy: 3, social: 5 } },
+      { text: '记住位置以后常来', effects: { fishing: 1, performance: 0, happy: 3, social: 0 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r12',
+    text: '有人在群里发起下午茶团购！"凑够十人打八折，谁来？"余默看了眼——奶茶加小蛋糕才15块。关键是取奶茶可以合法离开工位十分钟。',
+    choices: [
+      { text: '积极参加并帮拿', effects: { fishing: 3, performance: -1, happy: 4, social: 5 } },
+      { text: '参加但不帮拿', effects: { fishing: 1, performance: 0, happy: 3, social: 2 } },
+      { text: '忍住减肥不参加', effects: { fishing: -1, performance: 1, happy: -1, social: -1 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r13',
+    text: '一个新来的实习生怯生生地走过来："学长，请问会议室怎么走？"余默一时恍惚——原来自己已经是"老人"了。带路的过程中多摸了五分钟鱼，感觉不错。',
+    choices: [
+      { text: '热心带路顺便闲逛', effects: { fishing: 4, performance: -1, happy: 3, social: 5 } },
+      { text: '指个方向让他自己找', effects: { fishing: 1, performance: 0, happy: 0, social: -1 } },
+      { text: '带路并传授摸鱼秘籍', effects: { fishing: 5, performance: -2, happy: 5, social: 6 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r14',
+    text: '同事小李凑过来小声说："帮我掩护一下，我出去取个快递。如果导师问就说我去厕所了。"他眼神里满是信任。互助摸鱼，这就是同事间最珍贵的革命友谊。',
+    choices: [
+      { text: '仗义帮忙掩护', effects: { fishing: 3, performance: -1, happy: 2, social: 6 } },
+      { text: '让他快去快回', effects: { fishing: 1, performance: 0, happy: 1, social: 3 } },
+      { text: '要求他下次也帮我', effects: { fishing: 2, performance: 0, happy: 2, social: 4 } },
+    ],
+    probability: 0.15,
+  },
+  {
+    id: 'r15',
+    text: '一封全员邮件炸了群——据说某个高管要离职！整层楼都在窃窃私语，茶水间挤满了八卦的人。生产力瞬间归零，全员进入吃瓜模式。',
+    choices: [
+      { text: '加入吃瓜大军', effects: { fishing: 5, performance: -3, happy: 4, social: 5 } },
+      { text: '装作不感兴趣', effects: { fishing: -1, performance: 2, happy: -1, social: -2 } },
+      { text: '默默刷内网找线索', effects: { fishing: 3, performance: -1, happy: 3, social: 1 } },
+    ],
+    probability: 0.15,
+  },
+];
+
+window.EVENTS_V2_PART2 = EVENTS_V2_PART2;
+window.RANDOM_EVENTS_V2 = RANDOM_EVENTS_V2;
+
+
+// ============ 事件系统桥接 ============
+const ALL_EVENTS = {};
+for (const key in EVENTS_V2_PART1) ALL_EVENTS[key] = EVENTS_V2_PART1[key];
+for (const key in EVENTS_V2_PART2) ALL_EVENTS[key] = EVENTS_V2_PART2[key];
+const RANDOM_EVENTS = RANDOM_EVENTS_V2;
+
+class EventSystem {
+  getEvent(state) {
+    const dayKey = 'day' + state.day;
+    const dayEvents = ALL_EVENTS[dayKey];
+    if (!dayEvents) return null;
+    const periodEvents = dayEvents[state.period];
+    if (!periodEvents || periodEvents.length === 0) return null;
+    for (const evt of periodEvents) {
+      if (state.eventsCompleted.includes(evt.id)) continue;
+      if (evt.gender && evt.gender !== state.gender) continue;
+      return evt;
+    }
+    return null;
+  }
+
+  getEventById(id) {
+    for (const dayKey in ALL_EVENTS) {
+      const day = ALL_EVENTS[dayKey];
+      for (const period of ['morning', 'noon', 'afternoon', 'overtime', 'evening', 'midnight']) {
+        if (!day[period]) continue;
+        for (const evt of day[period]) {
+          if (evt.id === id) return evt;
+        }
+      }
+    }
+    for (const evt of RANDOM_EVENTS) {
+      if (evt.id === id) return evt;
+    }
+    return null;
+  }
+
+  getRandomEvent(state) {
+    const available = RANDOM_EVENTS.filter(e =>
+      !state.eventsCompleted.includes(e.id) && Math.random() < (e.probability || 0.15)
+    );
+    return available.length > 0 ? available[0] : null;
+  }
+
+  resolveChoice(state, choiceIndex) {
+    const event = this.getEventById(state.currentEventId);
+    if (!event || !event.choices || !event.choices[choiceIndex]) return null;
+    const choice = event.choices[choiceIndex];
+    return {
+      statChanges: choice.effects || null,
+      miniGame: event.triggerMiniGame || null,
+      text: choice.resultText || null,
+    };
+  }
+}
+
+// ============ 实习摸鱼记 - 核心代码 ============
+
+class GameState {
+  constructor() {
+    this.day = 1;
+    this.period = 'morning';
+    this.gender = null;
+    this.playerName = '';
+    this.fishing = 50;
+    this.performance = 50;
+    this.happy = 50;
+    this.social = 50;
+    this.flags = {};
+    this.miniGameScores = { bubble: 0, decode: 0, run: 0 };
+    this.currentEventId = null;
+    this.eventsCompleted = [];
+  }
+
+  static CALENDAR = [
+    null,
+    { date: '5/20', weekday: '周三', isWeekend: false, special: '520' },
+    { date: '5/21', weekday: '周四', isWeekend: false, special: null },
+    { date: '5/22', weekday: '周五', isWeekend: false, special: null },
+    { date: '5/23', weekday: '周六', isWeekend: true, special: null },
+    { date: '5/24', weekday: '周日', isWeekend: true, special: null },
+    { date: '5/25', weekday: '周一', isWeekend: false, special: null },
+    { date: '5/26', weekday: '周二', isWeekend: false, special: null },
+    { date: '5/27', weekday: '周三', isWeekend: false, special: null },
+    { date: '5/28', weekday: '周四', isWeekend: false, special: null },
+    { date: '5/29', weekday: '周五', isWeekend: false, special: null },
+    { date: '5/30', weekday: '周六', isWeekend: true, special: null },
+    { date: '5/31', weekday: '周日', isWeekend: true, special: '618开门红', isPromo: true },
+    { date: '6/1', weekday: '周一', isWeekend: false, special: '儿童节' },
+    { date: '6/2', weekday: '周二', isWeekend: false, special: null },
+    { date: '6/3', weekday: '周三', isWeekend: false, special: null },
+    { date: '6/4', weekday: '周四', isWeekend: false, special: null },
+    { date: '6/5', weekday: '周五', isWeekend: false, special: null },
+    { date: '6/6', weekday: '周六', isWeekend: true, special: null },
+    { date: '6/7', weekday: '周日', isWeekend: true, special: null },
+    { date: '6/8', weekday: '周一', isWeekend: false, special: '618倒计时10天' },
+    { date: '6/9', weekday: '周二', isWeekend: false, special: null },
+    { date: '6/10', weekday: '周三', isWeekend: false, special: null },
+    { date: '6/11', weekday: '周四', isWeekend: false, special: null },
+    { date: '6/12', weekday: '周五', isWeekend: false, special: null },
+    { date: '6/13', weekday: '周六', isWeekend: true, special: null },
+    { date: '6/14', weekday: '周日', isWeekend: true, special: null },
+    { date: '6/15', weekday: '周一', isWeekend: false, special: '618预热' },
+    { date: '6/16', weekday: '周二', isWeekend: false, special: '618倒计时' },
+    { date: '6/17', weekday: '周三', isWeekend: false, special: '618前夜' },
+    { date: '6/18', weekday: '周四', isWeekend: false, special: '618大促', isPromo: true },
+  ];
+
+  getCalendar() {
+    return GameState.CALENDAR[this.day] || GameState.CALENDAR[1];
+  }
+
+  isWeekend() {
+    return this.getCalendar().isWeekend;
+  }
+
+  modifyStats(changes) {
+    const stats = ['fishing', 'performance', 'happy', 'social'];
+    for (const stat of stats) {
+      if (changes[stat] !== undefined) {
+        this[stat] = Math.max(0, Math.min(100, this[stat] + changes[stat]));
+      }
+    }
+  }
+
+  nextPeriod() {
+    const cal = this.getCalendar();
+    let periods;
+    if (cal.isPromo) {
+      periods = ['morning', 'noon', 'afternoon', 'evening', 'midnight'];
+    } else if (cal.isWeekend) {
+      periods = ['morning', 'noon', 'afternoon'];
+    } else {
+      periods = ['morning', 'noon', 'afternoon', 'overtime'];
+    }
+    const idx = periods.indexOf(this.period);
+    if (idx < periods.length - 1) {
+      this.period = periods[idx + 1];
+    } else {
+      this.day++;
+      this.period = 'morning';
+    }
+  }
+
+  checkGameOver() {
+    if (this.performance <= 0) return 'fired';
+    if (this.day > 30) return 'ended';
+    return null;
+  }
+
+  serialize() {
+    return JSON.stringify({
+      day: this.day,
+      period: this.period,
+      gender: this.gender,
+      playerName: this.playerName,
+      fishing: this.fishing,
+      performance: this.performance,
+      happy: this.happy,
+      social: this.social,
+      flags: this.flags,
+      miniGameScores: this.miniGameScores,
+      currentEventId: this.currentEventId,
+      eventsCompleted: this.eventsCompleted
+    });
+  }
+
+  static deserialize(data) {
+    const obj = typeof data === 'string' ? JSON.parse(data) : data;
+    const state = new GameState();
+    Object.assign(state, obj);
+    return state;
+  }
+}
+
+// ============ 存档系统 ============
+
+class SaveSystem {
+  static _key(slot) {
+    return `intern_fish_save_${slot}`;
+  }
+
+  static save(slot, gameState) {
+    const data = {
+      state: gameState.serialize(),
+      timestamp: Date.now(),
+      summary: {
+        day: gameState.day,
+        period: gameState.period,
+        playerName: gameState.playerName
+      }
+    };
+    localStorage.setItem(this._key(slot), JSON.stringify(data));
+  }
+
+  static load(slot) {
+    const raw = localStorage.getItem(this._key(slot));
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    return GameState.deserialize(data.state);
+  }
+
+  static delete(slot) {
+    localStorage.removeItem(this._key(slot));
+  }
+
+  static getSlotInfo() {
+    const slots = [0, 1, 2, 'auto'];
+    const info = {};
+    for (const slot of slots) {
+      const raw = localStorage.getItem(this._key(slot));
+      if (raw) {
+        const data = JSON.parse(raw);
+        info[slot] = {
+          timestamp: data.timestamp,
+          ...data.summary
+        };
+      } else {
+        info[slot] = null;
+      }
+    }
+    return info;
+  }
+
+  static exportSave(slot) {
+    const raw = localStorage.getItem(this._key(slot));
+    if (!raw) return null;
+    return btoa(encodeURIComponent(raw));
+  }
+
+  static importSave(base64String, slot) {
+    try {
+      const raw = decodeURIComponent(atob(base64String));
+      JSON.parse(raw); // validate
+      localStorage.setItem(this._key(slot), raw);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+}
+
+// ============ 界面管理 ============
+
+class ScreenManager {
+  static show(screenName) {
+    const el = document.getElementById(`screen-${screenName}`);
+    if (el) {
+      el.style.display = 'flex';
+      el.classList.add('screen-active');
+      el.classList.remove('screen-hidden');
+    }
+  }
+
+  static hide(screenName) {
+    const el = document.getElementById(`screen-${screenName}`);
+    if (el) {
+      el.classList.add('screen-hidden');
+      el.classList.remove('screen-active');
+      setTimeout(() => { el.style.display = 'none'; }, 300);
+    }
+  }
+
+  static transition(from, to, callback) {
+    const fromEl = document.getElementById(`screen-${from}`);
+    const toEl = document.getElementById(`screen-${to}`);
+    if (fromEl) {
+      fromEl.classList.add('screen-hidden');
+      fromEl.classList.remove('screen-active');
+    }
+    setTimeout(() => {
+      if (fromEl) fromEl.style.display = 'none';
+      if (toEl) {
+        toEl.style.display = 'flex';
+        toEl.classList.remove('screen-hidden');
+        toEl.classList.add('screen-active');
+      }
+      if (callback) callback();
+    }, 300);
+  }
+}
+
+// ============ 结局系统 ============
+
+const ENDINGS = {
+  fishingGod: {
+    title: '摸鱼之神',
+    description: '你在30天内成功修炼成摸鱼高手，工作任务也没落下。老板以为你是天才，同事们只知道你效率奇高——殊不知你把摸鱼玩成了艺术。',
+    emoji: '🐟'
+  },
+  workaholic: {
+    title: '卷王转正',
+    description: '你以惊人的绩效获得了转正名额。代价是30天没摸过一次鱼，同事们在背后叫你"卷王"。但offer到手，一切值得...吗？',
+    emoji: '👔'
+  },
+  socialKing: {
+    title: '职场社牛',
+    description: '你认识了公司上上下下所有人，连CEO都知道你的名字。虽然代码没写几行，但你的人脉值已经拉满。有人说你迟早当CEO。',
+    emoji: '🤝'
+  },
+  happySlacker: {
+    title: '快乐摆烂',
+    description: '你度过了最快乐的30天实习。每天准时下班，午休打游戏，茶水间聊八卦。虽然没学到什么，但你的精神状态全公司最好。',
+    emoji: '😎'
+  },
+  balanced: {
+    title: '中庸之道',
+    description: '你既没有太摸鱼也没有太卷，既不是社牛也不是社恐。实习评价上写着"表现中规中矩"。也许这就是成年人的智慧。',
+    emoji: '⚖️'
+  },
+  fired: {
+    title: '光速毕业',
+    description: '你的绩效降到了零，HR微笑着递给你一份"提前结束实习"的通知。收拾工位的时候，你觉得这30天过得像30秒。',
+    emoji: '📦'
+  },
+  hidden: {
+    title: '完美摸鱼',
+    description: '你找到了工作与生活的终极平衡——既会摸鱼，又广交朋友，还保持着好心情。这是传说中的"摸鱼三连"成就，只有真正的高手才能达成。',
+    emoji: '🏆'
+  }
+};
+
+function calculateEnding(state) {
+  if (state.performance <= 0) return ENDINGS.fired;
+  if (state.fishing >= 70 && state.social >= 70 && state.happy >= 70) return ENDINGS.hidden;
+  if (state.fishing >= 85 && state.performance >= 30) return ENDINGS.fishingGod;
+  if (state.performance >= 85) return ENDINGS.workaholic;
+  if (state.social >= 85) return ENDINGS.socialKing;
+  if (state.happy >= 85) return ENDINGS.happySlacker;
+  const allBalanced = ['fishing', 'performance', 'happy', 'social'].every(
+    s => state[s] >= 35 && state[s] <= 65
+  );
+  if (allBalanced) return ENDINGS.balanced;
+  // 默认结局
+  return ENDINGS.balanced;
+}
+
+// ============ 日转换动画 ============
+
+function showDayTransition(day, callback) {
+  let overlay = document.getElementById('day-transition');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'day-transition';
+    overlay.style.cssText = `
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: #1a1a2e; color: #fff; font-size: 1.5rem;
+      opacity: 0; transition: opacity 0.4s ease;
+      pointer-events: none;
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  const cal = GameState.CALENDAR[day];
+  const emoji = cal && cal.isWeekend ? '🌙' : '💤';
+  const nextCal = GameState.CALENDAR[day + 1];
+  const nextInfo = nextCal ? `${nextCal.date} ${nextCal.weekday}${nextCal.special ? ' · ' + nextCal.special : ''}` : '旅程结束';
+
+  overlay.innerHTML = `
+    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">${emoji}</div>
+    <div>${cal ? cal.date : ''} 结束了</div>
+    <div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.6;">明天: ${nextInfo}</div>
+  `;
+  overlay.style.opacity = '1';
+  overlay.style.pointerEvents = 'all';
+
+  setTimeout(() => {
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    if (callback) callback();
+  }, 1500);
+}
+
+// ============ 游戏引擎 ============
+
+class GameEngine {
+  constructor() {
+    this.state = new GameState();
+    this.eventSystem = null;
+  }
+
+  startNew(gender) {
+    this.state = new GameState();
+    this.state.gender = gender;
+    this.state.playerName = gender === 'male' ? '余默' : '俞闲';
+    SaveSystem.save('auto', this.state);
+    ScreenManager.transition('charSelect', 'game');
+    this.advanceToNextEvent();
+  }
+
+  loadGame(slot) {
+    const loaded = SaveSystem.load(slot);
+    if (!loaded) return false;
+    this.state = loaded;
+    ScreenManager.transition('saveLoad', 'game');
+    this.render();
+    return true;
+  }
+
+  handleChoice(choiceIndex) {
+    if (!this.eventSystem) return;
+    const result = this.eventSystem.resolveChoice(this.state, choiceIndex);
+    if (result) {
+      if (result.statChanges) {
+        this.state.modifyStats(result.statChanges);
+      }
+      if (result.flag) {
+        this.state.flags[result.flag] = true;
+      }
+      if (result.miniGame) {
+        this.triggerMiniGame(result.miniGame);
+        return;
+      }
+      if (result.text) {
+        this.showResultText(result.text, () => this.afterEvent());
+        return;
+      }
+    }
+    this.afterEvent();
+  }
+
+  afterEvent() {
+    if (this.state.currentEventId) {
+      this.state.eventsCompleted.push(this.state.currentEventId);
+      this.state.currentEventId = null;
+    }
+
+    const gameOver = this.state.checkGameOver();
+    if (gameOver === 'fired') {
+      this.showEnding(ENDINGS.fired);
+      return;
+    }
+
+    const prevDay = this.state.day;
+    this.state.nextPeriod();
+
+    if (this.state.day !== prevDay) {
+      SaveSystem.save('auto', this.state);
+      if (this.state.day > 30) {
+        this.showEnding(calculateEnding(this.state));
+        return;
+      }
+      showDayTransition(prevDay, () => this.advanceToNextEvent());
+    } else {
+      this.advanceToNextEvent();
+    }
+  }
+
+  triggerMiniGame(type) {
+    this.state._pendingMiniGame = type;
+    ScreenManager.transition('game', 'miniGame', () => {
+      if (window.MiniGameManager) {
+        window.MiniGameManager.start(type, (score) => this.onMiniGameEnd(type, score));
+      }
+    });
+  }
+
+  onMiniGameEnd(type, score) {
+    this.state.miniGameScores[type] = Math.max(this.state.miniGameScores[type], score);
+    delete this.state._pendingMiniGame;
+
+    const bonus = score >= 80 ? { fishing: 5, happy: 5 } :
+                  score >= 50 ? { fishing: 3, happy: 3 } :
+                  { happy: -2 };
+    this.state.modifyStats(bonus);
+
+    ScreenManager.transition('miniGame', 'game', () => this.afterEvent());
+  }
+
+  advanceToNextEvent() {
+    // 检查emo事件
+    if (this.state.happy < 20 && !this.state.flags['emo_triggered_' + this.state.day]) {
+      this.state.flags['emo_triggered_' + this.state.day] = true;
+      this.triggerEmoEvent();
+      return;
+    }
+
+    // 20%概率随机事件
+    if (Math.random() < 0.2) {
+      const randomEvent = this.checkRandomEvent();
+      if (randomEvent) {
+        this.state.currentEventId = randomEvent.id;
+        this.render();
+        return;
+      }
+    }
+
+    // 常规事件
+    if (this.eventSystem) {
+      const event = this.eventSystem.getEvent(this.state);
+      if (event) {
+        this.state.currentEventId = event.id;
+      }
+    }
+    this.render();
+  }
+
+  checkRandomEvent() {
+    if (!this.eventSystem) return null;
+    return this.eventSystem.getRandomEvent(this.state);
+  }
+
+  triggerEmoEvent() {
+    const emoChoices = [
+      { text: '去天台吹吹风', effect: { happy: 10, performance: -3 } },
+      { text: '找同事聊聊天', effect: { happy: 8, social: 5, performance: -2 } },
+      { text: '硬撑继续工作', effect: { happy: -5, performance: 5 } }
+    ];
+    this.renderEvent({
+      id: 'emo_' + this.state.day,
+      title: '情绪低落',
+      text: `${this.state.playerName}感觉有点emo...需要做点什么调节一下。`,
+      choices: emoChoices
+    });
+  }
+
+  showEnding(ending) {
+    ScreenManager.transition('game', 'ending');
+    const el = document.getElementById('screen-ending');
+    if (el) {
+      el.innerHTML = `
+        <div class="ending-container">
+          <div class="ending-emoji">${ending.emoji}</div>
+          <h2 class="ending-title">${ending.title}</h2>
+          <p class="ending-desc">${ending.description}</p>
+          <div class="ending-stats">
+            <span>🐟 摸鱼: ${this.state.fishing}</span>
+            <span>📊 绩效: ${this.state.performance}</span>
+            <span>😊 快乐: ${this.state.happy}</span>
+            <span>🤝 人脉: ${this.state.social}</span>
+          </div>
+          <button class="btn" onclick="game.backToTitle()">返回标题</button>
+        </div>
+      `;
+    }
+  }
+
+  showResultText(text, callback) {
+    const gameScreen = document.getElementById('screen-game');
+    if (!gameScreen) { callback(); return; }
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'result-text';
+    resultDiv.innerHTML = `<p>${text}</p><button class="btn" onclick="this.parentElement.remove()">继续</button>`;
+    resultDiv.querySelector('button').addEventListener('click', callback);
+    gameScreen.appendChild(resultDiv);
+  }
+
+  renderEvent(event) {
+    const container = document.getElementById('event-container');
+    if (!container) return;
+    container.innerHTML = `
+      <div class="event-title">${event.title || ''}</div>
+      <div class="event-text">${event.text}</div>
+      <div class="event-choices">
+        ${event.choices.map((c, i) => `
+          <button class="choice-btn" onclick="game.handleEventChoice(${i}, ${JSON.stringify(event.choices[i].effect || {}).replace(/"/g, '&quot;')})">${c.text}</button>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  handleEventChoice(index, effect) {
+    if (effect) {
+      this.state.modifyStats(effect);
+    }
+    this.afterEvent();
+  }
+
+  render() {
+    this.renderStatusBar();
+
+    if (this.state.currentEventId && this.eventSystem) {
+      const event = this.eventSystem.getEventById(this.state.currentEventId);
+      if (event) {
+        this.renderEvent(event);
+        return;
+      }
+    }
+
+    // 无事件时显示默认选项
+    this.renderDefaultChoices();
+  }
+
+  renderStatusBar() {
+    const bar = document.getElementById('status-bar');
+    if (!bar) return;
+    const periodNames = { morning: '上午', noon: '午休', afternoon: '下午', overtime: '加班', evening: '19:50 晚高峰', midnight: '23:50 倒计时' };
+    const cal = this.state.getCalendar();
+    const specialTag = cal.special ? `<span style="color:#ffd700;font-size:0.75rem;margin-left:6px;">${cal.special}</span>` : '';
+    bar.innerHTML = `
+      <div class="status-info">
+        <span>${cal.date} ${cal.weekday}${specialTag}</span>
+        <span>${periodNames[this.state.period]}</span>
+        <span>${this.state.playerName}</span>
+      </div>
+    `;
+  }
+
+  renderDefaultChoices() {
+    const container = document.getElementById('event-container');
+    if (!container) return;
+
+    const periodActions = {
+      morning: [
+        { text: '认真写代码', effect: { performance: 8, happy: -3, fishing: -5 } },
+        { text: '摸鱼刷手机', effect: { fishing: 8, happy: 5, performance: -5 } },
+        { text: '和同事闲聊', effect: { social: 6, happy: 3, performance: -3 } }
+      ],
+      noon: [
+        { text: '午休睡觉', effect: { happy: 5, fishing: 3 } },
+        { text: '学习新技术', effect: { performance: 5, happy: -2 } },
+        { text: '和同事聚餐', effect: { social: 5, happy: 3, fishing: 2 } }
+      ],
+      afternoon: [
+        { text: '专注开发需求', effect: { performance: 10, happy: -5, fishing: -5 } },
+        { text: '带薪上厕所', effect: { fishing: 5, happy: 3, performance: -2 } },
+        { text: '帮同事解bug', effect: { social: 5, performance: 3, happy: -2 } }
+      ],
+      overtime: [
+        { text: '主动加班', effect: { performance: 10, happy: -8, fishing: -5 } },
+        { text: '准时下班', effect: { happy: 8, fishing: 5, performance: -3 } },
+        { text: '假装加班实则摸鱼', effect: { fishing: 10, happy: 3, performance: -1 } }
+      ]
+    };
+
+    const actions = periodActions[this.state.period] || periodActions.morning;
+    const periodNames = { morning: '上午', noon: '午休', afternoon: '下午', overtime: '加班时间', evening: '19:50 晚高峰', midnight: '23:50 倒计时' };
+
+    container.innerHTML = `
+      <div class="event-title">${periodNames[this.state.period]}</div>
+      <div class="event-text">${this.state.playerName}正在工位上，接下来做什么？</div>
+      <div class="event-choices">
+        ${actions.map((a, i) => `
+          <button class="choice-btn" onclick="game.handleEventChoice(${i}, ${JSON.stringify(a.effect).replace(/"/g, '&quot;')})">${a.text}</button>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  backToTitle() {
+    ScreenManager.transition('ending', 'title');
+  }
+}
+
+// ============ 全局实例 ============
+
+const game = new GameEngine();
+
+/**
+ * 实习摸鱼记 - 小游戏模块
+ * 包含三个小游戏：老板画饼大赏、职场黑话解码器、打工人逃离
+ * 适配手机竖屏 375x667 基准
+ */
+
+// ============================================================
+// MiniGameManager - 统一管理器
+// ============================================================
+class MiniGameManager {
+  constructor(container) {
+    this.container = container;
+    this.onComplete = null;
+    this.currentGame = null;
+  }
+
+  start(type) {
+    this.stop();
+    this.container.innerHTML = '';
+    this.container.style.position = 'relative';
+    this.container.style.width = '100%';
+    this.container.style.height = '100%';
+    this.container.style.overflow = 'hidden';
+
+    switch (type) {
+      case 'bubble':
+        this.currentGame = new BubbleGame(this.container, (score) => {
+          if (this.onComplete) this.onComplete('bubble', score);
+        });
+        break;
+      case 'decode':
+        this.currentGame = new DecodeGame(this.container, (score) => {
+          if (this.onComplete) this.onComplete('decode', score);
+        });
+        break;
+      case 'run':
+        this.currentGame = new RunGame(this.container, (score) => {
+          if (this.onComplete) this.onComplete('run', score);
+        });
+        break;
+      default:
+        console.error('Unknown game type:', type);
+        return;
+    }
+
+    this.currentGame.start();
+  }
+
+  stop() {
+    if (this.currentGame) {
+      this.currentGame.destroy();
+      this.currentGame = null;
+    }
+    this.container.innerHTML = '';
+  }
+}
+
+// ============================================================
+// 小游戏A：老板画饼大赏 (BubbleGame)
+// ============================================================
+class BubbleGame {
+  constructor(container, onComplete) {
+    this.container = container;
+    this.onComplete = onComplete;
+    this.canvas = null;
+    this.ctx = null;
+    this.animFrame = null;
+    this.timer = null;
+    this.timeLeft = 15;
+    this.score = 0;
+    this.bubbles = [];
+    this.particles = [];
+    this.lastSpawnTime = 0;
+    this.spawnInterval = 600;
+    this.running = false;
+
+    this.phrases = [
+      "明年一定给你转正", "期权马上就有了", "年底double", "下个季度调薪",
+      "你的成长我看在眼里", "这个项目做完就轻松了", "加班是为了你好",
+      "年轻人要多学习", "公司就是你的家", "我们是扁平化管理",
+      "弹性工作制", "结果导向不看过程", "你很有潜力", "这是给你锻炼的机会",
+      "薪资保密是保护你", "我当年比你还累", "格局要大",
+      "先把事情做好钱自然来", "不要太在意短期收益", "我们这个赛道前景很好",
+      "你是我见过最有潜力的实习生", "转正后待遇翻倍", "期权以后上市了值几百万",
+      "周末来加班算你调休", "这次绩效委屈你了下次补", "我跟HR提了给你涨薪",
+      "这个项目对你简历很有帮助", "别的公司更累的", "我们团队氛围最好了",
+      "实习期不算试用期到时直接转", "你很适合管理岗以后带团队"
+    ];
+
+    this.colors = [
+      'rgba(173, 216, 255, 0.9)',
+      'rgba(255, 245, 180, 0.9)',
+      'rgba(255, 200, 210, 0.9)',
+      'rgba(200, 255, 200, 0.9)',
+      'rgba(230, 210, 255, 0.9)'
+    ];
+  }
+
+  start() {
+    this.createCanvas();
+    this.bindEvents();
+    this.running = true;
+    this.lastTime = performance.now();
+    this.lastSpawnTime = 0;
+    this.startTimer();
+    this.loop();
+  }
+
+  createCanvas() {
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
+    this.canvas.style.display = 'block';
+    this.canvas.style.touchAction = 'none';
+    this.container.appendChild(this.canvas);
+
+    const rect = this.container.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    this.width = rect.width;
+    this.height = rect.height;
+    this.canvas.width = this.width * dpr;
+    this.canvas.height = this.height * dpr;
+    this.ctx = this.canvas.getContext('2d');
+    this.ctx.scale(dpr, dpr);
+  }
+
+  bindEvents() {
+    this.handleClick = (e) => {
+      e.preventDefault();
+      const rect = this.canvas.getBoundingClientRect();
+      let x, y;
+      if (e.touches) {
+        x = e.touches[0].clientX - rect.left;
+        y = e.touches[0].clientY - rect.top;
+      } else {
+        x = e.clientX - rect.left;
+        y = e.clientY - rect.top;
+      }
+      this.checkHit(x, y);
+    };
+
+    this.canvas.addEventListener('touchstart', this.handleClick, { passive: false });
+    this.canvas.addEventListener('mousedown', this.handleClick);
+  }
+
+  checkHit(x, y) {
+    for (let i = this.bubbles.length - 1; i >= 0; i--) {
+      const b = this.bubbles[i];
+      if (x >= b.x - b.w / 2 && x <= b.x + b.w / 2 &&
+          y >= b.y - b.h / 2 && y <= b.y + b.h / 2) {
+        this.score++;
+        this.createExplosion(b.x, b.y, b.color);
+        this.bubbles.splice(i, 1);
+        break;
+      }
+    }
+  }
+
+  createExplosion(x, y, color) {
+    for (let i = 0; i < 8; i++) {
+      const angle = (Math.PI * 2 * i) / 8;
+      const speed = 2 + Math.random() * 3;
+      this.particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1,
+        color: color,
+        size: 4 + Math.random() * 4
+      });
+    }
+  }
+
+  spawnBubble() {
+    const text = this.phrases[Math.floor(Math.random() * this.phrases.length)];
+    const fontSize = 14;
+    this.ctx.font = fontSize + 'px sans-serif';
+    const textWidth = this.ctx.measureText(text).width;
+    const w = textWidth + 30;
+    const h = 44;
+    const x = Math.random() * (this.width - w) + w / 2;
+
+    this.bubbles.push({
+      x: x,
+      y: -h,
+      w: w,
+      h: h,
+      text: text,
+      speed: 1.5 + Math.random() * 1.5,
+      color: this.colors[Math.floor(Math.random() * this.colors.length)],
+      fontSize: fontSize
+    });
+  }
+
+  startTimer() {
+    this.timer = setInterval(() => {
+      this.timeLeft--;
+      if (this.timeLeft <= 0) {
+        this.endGame();
+      }
+    }, 1000);
+  }
+
+  loop() {
+    if (!this.running) return;
+
+    const now = performance.now();
+    const dt = now - this.lastTime;
+    this.lastTime = now;
+
+    this.lastSpawnTime += dt;
+    if (this.lastSpawnTime >= this.spawnInterval) {
+      this.spawnBubble();
+      this.lastSpawnTime = 0;
+      this.spawnInterval = Math.max(300, this.spawnInterval - 5);
+    }
+
+    this.update(dt);
+    this.render();
+
+    this.animFrame = requestAnimationFrame(() => this.loop());
+  }
+
+  update(dt) {
+    for (let i = this.bubbles.length - 1; i >= 0; i--) {
+      this.bubbles[i].y += this.bubbles[i].speed;
+      if (this.bubbles[i].y > this.height + 50) {
+        this.bubbles.splice(i, 1);
+      }
+    }
+
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.1;
+      p.life -= 0.03;
+      if (p.life <= 0) {
+        this.particles.splice(i, 1);
+      }
+    }
+  }
+
+  render() {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.width, this.height);
+
+    // 背景
+    ctx.fillStyle = '#f0f4f8';
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    // 气泡
+    for (const b of this.bubbles) {
+      ctx.save();
+      ctx.fillStyle = b.color;
+      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+      ctx.lineWidth = 1;
+      this.roundRect(ctx, b.x - b.w / 2, b.y - b.h / 2, b.w, b.h, 20);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#333';
+      ctx.font = b.fontSize + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(b.text, b.x, b.y);
+      ctx.restore();
+    }
+
+    // 粒子
+    for (const p of this.particles) {
+      ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+      ctx.restore();
+    }
+
+    // HUD - 顶部
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, this.width, 50);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('⏱ ' + this.timeLeft + 's', 15, 25);
+    ctx.textAlign = 'right';
+    ctx.fillText('得分: ' + this.score, this.width - 15, 25);
+
+    // 底部提示
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('戳破老板的饼！', this.width / 2, this.height - 30);
+  }
+
+  roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  endGame() {
+    this.running = false;
+    if (this.animFrame) cancelAnimationFrame(this.animFrame);
+    if (this.timer) clearInterval(this.timer);
+
+    let finalScore;
+    if (this.score >= 16) finalScore = 3;
+    else if (this.score >= 6) finalScore = 2;
+    else finalScore = 1;
+
+    this.showResult(finalScore);
+  }
+
+  showResult(finalScore) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; z-index: 100;
+    `;
+
+    const labels = ['', '菜鸟级', '老油条级', '戳饼大师级'];
+    overlay.innerHTML = `
+      <div style="background: white; border-radius: 16px; padding: 30px 40px; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 10px;">🫓</div>
+        <div style="font-size: 22px; font-weight: bold; margin-bottom: 8px;">戳破了 ${this.score} 个饼</div>
+        <div style="font-size: 16px; color: #666; margin-bottom: 20px;">${labels[finalScore]}</div>
+        <button id="bubble-continue-btn" style="
+          padding: 12px 40px; font-size: 16px; border: none;
+          background: #4a90d9; color: white; border-radius: 25px; cursor: pointer;
+        ">继续</button>
+      </div>
+    `;
+
+    this.container.appendChild(overlay);
+
+    const btn = document.getElementById('bubble-continue-btn');
+    btn.addEventListener('click', () => {
+      if (this.onComplete) this.onComplete(finalScore);
+    });
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      if (this.onComplete) this.onComplete(finalScore);
+    });
+  }
+
+  destroy() {
+    this.running = false;
+    if (this.animFrame) cancelAnimationFrame(this.animFrame);
+    if (this.timer) clearInterval(this.timer);
+    if (this.canvas) {
+      this.canvas.removeEventListener('touchstart', this.handleClick);
+      this.canvas.removeEventListener('mousedown', this.handleClick);
+    }
+  }
+}
+
+// ============================================================
+// 小游戏B：职场黑话解码器 (DecodeGame)
+// ============================================================
+class DecodeGame {
+  constructor(container, onComplete) {
+    this.container = container;
+    this.onComplete = onComplete;
+    this.timer = null;
+    this.timeLeft = 20;
+    this.score = 0;
+    this.combo = 0;
+    this.selectedTop = null;
+    this.selectedBottom = null;
+    this.running = false;
+    this.pairs = [];
+    this.matchedPairs = 0;
+
+    this.allPairs = [
+      { black: "这个需求很简单", truth: "加班到凌晨" },
+      { black: "我们复盘一下", truth: "找人背锅" },
+      { black: "你先对齐一下", truth: "别来烦我" },
+      { black: "我们抓大放小", truth: "这活儿不想干" },
+      { black: "赋能业务", truth: "做PPT" },
+      { black: "向上管理", truth: "拍马屁" },
+      { black: "拉通对齐", truth: "开个没用的会" },
+      { black: "闭环", truth: "别再来找我" },
+      { black: "颗粒度再细一点", truth: "重做" },
+      { black: "这个你看着办", truth: "出事你负责" },
+      { black: "组织架构调整", truth: "要裁员了" },
+      { black: "优化人员结构", truth: "裁员" },
+      { black: "拥抱变化", truth: "又改需求了" },
+      { black: "给你个机会", truth: "没人想干的活" },
+      { black: "你要有owner意识", truth: "免费加班" },
+      { black: "差不多就行", truth: "我不想看了赶紧过" },
+      { black: "我说两句啊", truth: "接下来半小时别想走" },
+      { black: "你抗压能力很强", truth: "继续压榨你" },
+      { black: "我们敏捷开发", truth: "没文档直接开干" },
+      { black: "下次注意", truth: "记仇了" },
+      { black: "你这个方案很有想法", truth: "不会采纳" },
+      { black: "有什么想法随时找我", truth: "别来找我" }
+    ];
+  }
+
+  start() {
+    this.running = true;
+    this.selectPairs();
+    this.createDOM();
+    this.startTimer();
+  }
+
+  selectPairs() {
+    const shuffled = [...this.allPairs].sort(() => Math.random() - 0.5);
+    this.pairs = shuffled.slice(0, 4);
+  }
+
+  createDOM() {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `
+      width: 100%; height: 100%; display: flex; flex-direction: column;
+      background: #1a1a2e; padding: 0; box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    `;
+
+    // HUD
+    const hud = document.createElement('div');
+    hud.style.cssText = `
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; color: white; font-size: 16px; font-weight: bold;
+      flex-shrink: 0;
+    `;
+    hud.innerHTML = `
+      <span id="decode-time">⏱ ${this.timeLeft}s</span>
+      <span id="decode-score">得分: ${this.score}</span>
+      <span id="decode-combo" style="color: #ffd700; display: none;">连击!</span>
+    `;
+    wrapper.appendChild(hud);
+
+    // 标题
+    const title = document.createElement('div');
+    title.style.cssText = `
+      text-align: center; color: #aaa; font-size: 14px; padding: 5px 0;
+      flex-shrink: 0;
+    `;
+    title.textContent = '将黑话与真实含义配对';
+    wrapper.appendChild(title);
+
+    // 上方黑话卡片区
+    const topLabel = document.createElement('div');
+    topLabel.style.cssText = 'color: #7eb8da; font-size: 13px; padding: 8px 16px; flex-shrink: 0;';
+    topLabel.textContent = '▼ 职场黑话';
+    wrapper.appendChild(topLabel);
+
+    const topArea = document.createElement('div');
+    topArea.id = 'decode-top-area';
+    topArea.style.cssText = `
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      padding: 0 16px; flex: 1; align-content: start;
+    `;
+    wrapper.appendChild(topArea);
+
+    // 下方真话卡片区
+    const bottomLabel = document.createElement('div');
+    bottomLabel.style.cssText = 'color: #e8a838; font-size: 13px; padding: 8px 16px; flex-shrink: 0;';
+    bottomLabel.textContent = '▼ 真实含义';
+    wrapper.appendChild(bottomLabel);
+
+    const bottomArea = document.createElement('div');
+    bottomArea.id = 'decode-bottom-area';
+    bottomArea.style.cssText = `
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      padding: 0 16px 16px; flex: 1; align-content: start;
+    `;
+    wrapper.appendChild(bottomArea);
+
+    this.container.appendChild(wrapper);
+
+    // 创建卡片
+    const shuffledTruths = [...this.pairs].sort(() => Math.random() - 0.5);
+
+    this.pairs.forEach((pair, idx) => {
+      const card = this.createCard(pair.black, 'top', idx);
+      topArea.appendChild(card);
+    });
+
+    shuffledTruths.forEach((pair, idx) => {
+      const originalIdx = this.pairs.indexOf(pair);
+      const card = this.createCard(pair.truth, 'bottom', originalIdx);
+      bottomArea.appendChild(card);
+    });
+  }
+
+  createCard(text, type, pairIndex) {
+    const card = document.createElement('div');
+    card.dataset.type = type;
+    card.dataset.pairIndex = pairIndex;
+    card.style.cssText = `
+      background: ${type === 'top' ? '#16213e' : '#2d1810'};
+      border: 2px solid ${type === 'top' ? '#4a7eb5' : '#d4831a'};
+      border-radius: 12px; padding: 12px 8px; text-align: center;
+      color: white; font-size: 13px; cursor: pointer;
+      transition: all 0.2s ease; user-select: none;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 50px;
+    `;
+    card.textContent = text;
+
+    const handler = (e) => {
+      e.preventDefault();
+      if (!this.running) return;
+      this.handleCardClick(card, type, pairIndex);
+    };
+
+    card.addEventListener('click', handler);
+    card.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      handler(e);
+    });
+
+    return card;
+  }
+
+  handleCardClick(card, type, pairIndex) {
+    if (card.dataset.matched === 'true') return;
+
+    if (type === 'top') {
+      if (this.selectedTop) {
+        this.selectedTop.style.transform = '';
+        this.selectedTop.style.boxShadow = '';
+      }
+      this.selectedTop = card;
+      this.selectedTopIndex = pairIndex;
+      card.style.transform = 'scale(1.05)';
+      card.style.boxShadow = '0 0 15px rgba(74, 126, 181, 0.8)';
+    } else {
+      if (this.selectedBottom) {
+        this.selectedBottom.style.transform = '';
+        this.selectedBottom.style.boxShadow = '';
+      }
+      this.selectedBottom = card;
+      this.selectedBottomIndex = pairIndex;
+      card.style.transform = 'scale(1.05)';
+      card.style.boxShadow = '0 0 15px rgba(212, 131, 26, 0.8)';
+    }
+
+    if (this.selectedTop && this.selectedBottom) {
+      this.checkMatch();
+    }
+  }
+
+  checkMatch() {
+    const topCard = this.selectedTop;
+    const bottomCard = this.selectedBottom;
+    const topIdx = this.selectedTopIndex;
+    const bottomIdx = this.selectedBottomIndex;
+
+    this.selectedTop = null;
+    this.selectedBottom = null;
+
+    if (topIdx === bottomIdx) {
+      // 匹配成功
+      this.combo++;
+      this.score += this.combo;
+      this.matchedPairs++;
+
+      topCard.dataset.matched = 'true';
+      bottomCard.dataset.matched = 'true';
+
+      topCard.style.background = 'rgba(40, 167, 69, 0.3)';
+      topCard.style.border = '2px solid #28a745';
+      topCard.style.transform = '';
+      topCard.style.boxShadow = '';
+      bottomCard.style.background = 'rgba(40, 167, 69, 0.3)';
+      bottomCard.style.border = '2px solid #28a745';
+      bottomCard.style.transform = '';
+      bottomCard.style.boxShadow = '';
+
+      // 对勾动画
+      this.showCheckmark(topCard);
+      this.showCheckmark(bottomCard);
+
+      // 显示连击
+      if (this.combo > 1) {
+        const comboEl = document.getElementById('decode-combo');
+        if (comboEl) {
+          comboEl.style.display = 'inline';
+          comboEl.textContent = this.combo + '连击!';
+          setTimeout(() => { comboEl.style.display = 'none'; }, 800);
+        }
+      }
+
+      this.updateScore();
+
+      // 淡出
+      setTimeout(() => {
+        topCard.style.opacity = '0.4';
+        bottomCard.style.opacity = '0.4';
+        topCard.style.pointerEvents = 'none';
+        bottomCard.style.pointerEvents = 'none';
+      }, 500);
+
+      if (this.matchedPairs >= 4) {
+        setTimeout(() => this.endGame(), 600);
+      }
+    } else {
+      // 匹配失败
+      this.combo = 0;
+      this.shakeCard(topCard);
+      this.shakeCard(bottomCard);
+    }
+  }
+
+  showCheckmark(card) {
+    const check = document.createElement('div');
+    check.textContent = '✓';
+    check.style.cssText = `
+      position: absolute; font-size: 24px; color: #28a745;
+      font-weight: bold; animation: fadeInUp 0.3s ease;
+    `;
+    card.style.position = 'relative';
+    card.appendChild(check);
+    setTimeout(() => check.remove(), 1000);
+  }
+
+  shakeCard(card) {
+    card.style.border = '2px solid #dc3545';
+    card.style.animation = 'shake 0.4s ease';
+    card.style.boxShadow = '0 0 10px rgba(220, 53, 69, 0.5)';
+
+    setTimeout(() => {
+      card.style.border = card.dataset.type === 'top'
+        ? '2px solid #4a7eb5'
+        : '2px solid #d4831a';
+      card.style.animation = '';
+      card.style.transform = '';
+      card.style.boxShadow = '';
+    }, 400);
+  }
+
+  updateScore() {
+    const scoreEl = document.getElementById('decode-score');
+    if (scoreEl) scoreEl.textContent = '得分: ' + this.score;
+  }
+
+  startTimer() {
+    this.timer = setInterval(() => {
+      this.timeLeft--;
+      const timeEl = document.getElementById('decode-time');
+      if (timeEl) timeEl.textContent = '⏱ ' + this.timeLeft + 's';
+      if (this.timeLeft <= 0) {
+        this.endGame();
+      }
+    }, 1000);
+
+    // 注入动画样式
+    if (!document.getElementById('decode-styles')) {
+      const style = document.createElement('style');
+      style.id = 'decode-styles';
+      style.textContent = `
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-5px); }
+          40% { transform: translateX(5px); }
+          60% { transform: translateX(-5px); }
+          80% { transform: translateX(5px); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+
+  endGame() {
+    this.running = false;
+    if (this.timer) clearInterval(this.timer);
+
+    let finalScore;
+    if (this.matchedPairs >= 4) finalScore = 3;
+    else if (this.matchedPairs >= 2) finalScore = 2;
+    else finalScore = 1;
+
+    this.showResult(finalScore);
+  }
+
+  showResult(finalScore) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; z-index: 100;
+    `;
+
+    const labels = ['', '职场小白', '黑话达人', '解码大师'];
+    overlay.innerHTML = `
+      <div style="background: #1a1a2e; border: 1px solid #444; border-radius: 16px; padding: 30px 40px; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 10px;">🔍</div>
+        <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 8px;">
+          配对成功 ${this.matchedPairs} 组
+        </div>
+        <div style="font-size: 16px; color: #aaa; margin-bottom: 20px;">${labels[finalScore]}</div>
+        <button id="decode-continue-btn" style="
+          padding: 12px 40px; font-size: 16px; border: none;
+          background: #e8a838; color: white; border-radius: 25px; cursor: pointer;
+        ">继续</button>
+      </div>
+    `;
+
+    this.container.appendChild(overlay);
+
+    const btn = document.getElementById('decode-continue-btn');
+    btn.addEventListener('click', () => {
+      if (this.onComplete) this.onComplete(finalScore);
+    });
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      if (this.onComplete) this.onComplete(finalScore);
+    });
+  }
+
+  destroy() {
+    this.running = false;
+    if (this.timer) clearInterval(this.timer);
+  }
+}
+
+// ============================================================
+// 小游戏C：打工人逃离 (RunGame)
+// ============================================================
+class RunGame {
+  constructor(container, onComplete) {
+    this.container = container;
+    this.onComplete = onComplete;
+    this.canvas = null;
+    this.ctx = null;
+    this.animFrame = null;
+    this.timer = null;
+    this.timeLeft = 20;
+    this.survivalTime = 0;
+    this.running = false;
+    this.gameOver = false;
+
+    // 物理参数
+    this.gravity = 0.6;
+    this.jumpForce = -12;
+    this.groundY = 0;
+    this.speed = 4;
+    this.maxSpeed = 8;
+    this.lastSpeedUp = 0;
+
+    // 角色
+    this.player = {
+      x: 60,
+      y: 0,
+      w: 30,
+      h: 50,
+      vy: 0,
+      onGround: true,
+      jumps: 0,
+      maxJumps: 2,
+      frame: 0,
+      frameTimer: 0
+    };
+
+    // 障碍物
+    this.obstacles = [];
+    this.obstacleTimer = 0;
+    this.minSpawnInterval = 1200;
+
+    // 背景
+    this.bgOffset = 0;
+    this.floorOffset = 0;
+
+    // 障碍类型
+    this.obstacleTypes = [
+      { emoji: '📄', label: '需求文档', type: 'low', w: 30, h: 35 },
+      { emoji: '📅', label: '会议邀请', type: 'high', w: 35, h: 55 },
+      { emoji: '💬', label: '"在吗"', type: 'air', w: 35, h: 30 },
+      { emoji: '📧', label: '全员邮件', type: 'double', w: 30, h: 35 }
+    ];
+  }
+
+  start() {
+    this.createCanvas();
+    this.bindEvents();
+    this.running = true;
+    this.gameOver = false;
+    this.groundY = this.height - 80;
+    this.player.y = this.groundY - this.player.h;
+    this.lastTime = performance.now();
+    this.startTime = performance.now();
+    this.lastSpeedUp = 0;
+    this.startTimer();
+    this.loop();
+  }
+
+  createCanvas() {
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
+    this.canvas.style.display = 'block';
+    this.canvas.style.touchAction = 'none';
+    this.container.appendChild(this.canvas);
+
+    const rect = this.container.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    this.width = rect.width;
+    this.height = rect.height;
+    this.canvas.width = this.width * dpr;
+    this.canvas.height = this.height * dpr;
+    this.ctx = this.canvas.getContext('2d');
+    this.ctx.scale(dpr, dpr);
+  }
+
+  bindEvents() {
+    this.handleJump = (e) => {
+      e.preventDefault();
+      if (!this.running || this.gameOver) return;
+      this.jump();
+    };
+
+    this.handleKey = (e) => {
+      if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault();
+        if (!this.running || this.gameOver) return;
+        this.jump();
+      }
+    };
+
+    this.canvas.addEventListener('touchstart', this.handleJump, { passive: false });
+    this.canvas.addEventListener('mousedown', this.handleJump);
+    document.addEventListener('keydown', this.handleKey);
+  }
+
+  jump() {
+    if (this.player.jumps < this.player.maxJumps) {
+      this.player.vy = this.jumpForce;
+      this.player.onGround = false;
+      this.player.jumps++;
+    }
+  }
+
+  startTimer() {
+    this.timer = setInterval(() => {
+      this.timeLeft--;
+      this.survivalTime++;
+
+      // 每5秒加速
+      if (this.survivalTime % 5 === 0 && this.speed < this.maxSpeed) {
+        this.speed += 0.8;
+      }
+
+      if (this.timeLeft <= 0) {
+        this.endGame(false);
+      }
+    }, 1000);
+  }
+
+  spawnObstacle() {
+    const typeIdx = Math.floor(Math.random() * this.obstacleTypes.length);
+    const type = this.obstacleTypes[typeIdx];
+
+    if (type.type === 'double') {
+      // 双障碍
+      this.obstacles.push({
+        x: this.width + 10,
+        y: this.groundY - type.h,
+        w: type.w,
+        h: type.h,
+        emoji: type.emoji,
+        kind: 'low'
+      });
+      this.obstacles.push({
+        x: this.width + 60,
+        y: this.groundY - type.h,
+        w: type.w,
+        h: type.h,
+        emoji: type.emoji,
+        kind: 'low'
+      });
+    } else if (type.type === 'air') {
+      // 空中障碍
+      this.obstacles.push({
+        x: this.width + 10,
+        y: this.groundY - 90 - type.h,
+        w: type.w,
+        h: type.h,
+        emoji: type.emoji,
+        kind: 'air'
+      });
+    } else if (type.type === 'high') {
+      this.obstacles.push({
+        x: this.width + 10,
+        y: this.groundY - type.h,
+        w: type.w,
+        h: type.h,
+        emoji: type.emoji,
+        kind: 'high'
+      });
+    } else {
+      this.obstacles.push({
+        x: this.width + 10,
+        y: this.groundY - type.h,
+        w: type.w,
+        h: type.h,
+        emoji: type.emoji,
+        kind: 'low'
+      });
+    }
+  }
+
+  loop() {
+    if (!this.running) return;
+
+    const now = performance.now();
+    const dt = now - this.lastTime;
+    this.lastTime = now;
+
+    this.update(dt);
+    this.render();
+
+    this.animFrame = requestAnimationFrame(() => this.loop());
+  }
+
+  update(dt) {
+    if (this.gameOver) return;
+
+    // 玩家物理
+    this.player.vy += this.gravity;
+    this.player.y += this.player.vy;
+
+    if (this.player.y >= this.groundY - this.player.h) {
+      this.player.y = this.groundY - this.player.h;
+      this.player.vy = 0;
+      this.player.onGround = true;
+      this.player.jumps = 0;
+    }
+
+    // 跑步动画
+    this.player.frameTimer += dt;
+    if (this.player.frameTimer > 150) {
+      this.player.frame = (this.player.frame + 1) % 2;
+      this.player.frameTimer = 0;
+    }
+
+    // 障碍物生成
+    this.obstacleTimer += dt;
+    const spawnInterval = Math.max(800, this.minSpawnInterval - this.survivalTime * 20);
+    if (this.obstacleTimer >= spawnInterval) {
+      this.spawnObstacle();
+      this.obstacleTimer = 0;
+    }
+
+    // 障碍物移动
+    for (let i = this.obstacles.length - 1; i >= 0; i--) {
+      this.obstacles[i].x -= this.speed;
+      if (this.obstacles[i].x < -50) {
+        this.obstacles.splice(i, 1);
+      }
+    }
+
+    // 碰撞检测
+    for (const obs of this.obstacles) {
+      if (this.checkCollision(this.player, obs)) {
+        this.endGame(true);
+        return;
+      }
+    }
+
+    // 背景滚动
+    this.bgOffset = (this.bgOffset + this.speed * 0.3) % 200;
+    this.floorOffset = (this.floorOffset + this.speed) % 40;
+  }
+
+  checkCollision(player, obs) {
+    const shrink = 5;
+    return (
+      player.x + shrink < obs.x + obs.w &&
+      player.x + player.w - shrink > obs.x &&
+      player.y + shrink < obs.y + obs.h &&
+      player.y + player.h - shrink > obs.y
+    );
+  }
+
+  render() {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.width, this.height);
+
+    // 背景（办公室色调）
+    ctx.fillStyle = '#2c2c3a';
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    // 背景工位剪影
+    ctx.fillStyle = '#3a3a4a';
+    for (let i = 0; i < 5; i++) {
+      const x = ((i * 200) - this.bgOffset + 1000) % (this.width + 200) - 100;
+      // 工位
+      ctx.fillRect(x, this.groundY - 120, 80, 80);
+      ctx.fillRect(x + 10, this.groundY - 140, 60, 20);
+      // 显示器
+      ctx.fillRect(x + 25, this.groundY - 160, 30, 25);
+    }
+
+    // 地板
+    ctx.fillStyle = '#555';
+    ctx.fillRect(0, this.groundY, this.width, this.height - this.groundY);
+
+    // 地板格子
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 1;
+    for (let x = -this.floorOffset; x < this.width; x += 40) {
+      ctx.beginPath();
+      ctx.moveTo(x, this.groundY);
+      ctx.lineTo(x, this.height);
+      ctx.stroke();
+    }
+    for (let y = this.groundY; y < this.height; y += 20) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.width, y);
+      ctx.stroke();
+    }
+
+    // 角色（火柴人）
+    this.drawPlayer(ctx);
+
+    // 障碍物
+    for (const obs of this.obstacles) {
+      ctx.font = obs.w + 'px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(obs.emoji, obs.x + obs.w / 2, obs.y + obs.h);
+    }
+
+    // HUD
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, this.width, 50);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('⏱ ' + this.timeLeft + 's', 15, 25);
+    ctx.textAlign = 'center';
+    ctx.fillText('存活 ' + this.survivalTime + '秒', this.width / 2, 25);
+    ctx.textAlign = 'right';
+    const speedPercent = Math.round((this.speed / this.maxSpeed) * 100);
+    ctx.fillText('速度 ' + speedPercent + '%', this.width - 15, 25);
+
+    // 底部提示
+    if (this.survivalTime < 3) {
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('点击屏幕跳跃，可以二段跳！', this.width / 2, this.height - 20);
+    }
+  }
+
+  drawPlayer(ctx) {
+    const p = this.player;
+    const cx = p.x + p.w / 2;
+    const isJumping = !p.onGround;
+
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+
+    // 头
+    ctx.beginPath();
+    ctx.arc(cx, p.y + 10, 8, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 身体
+    ctx.beginPath();
+    ctx.moveTo(cx, p.y + 18);
+    ctx.lineTo(cx, p.y + 35);
+    ctx.stroke();
+
+    // 手臂
+    if (isJumping) {
+      // 跳跃时手臂向上
+      ctx.beginPath();
+      ctx.moveTo(cx, p.y + 22);
+      ctx.lineTo(cx - 10, p.y + 15);
+      ctx.moveTo(cx, p.y + 22);
+      ctx.lineTo(cx + 10, p.y + 15);
+      ctx.stroke();
+    } else {
+      // 跑步摆臂
+      const armOffset = p.frame === 0 ? 8 : -8;
+      ctx.beginPath();
+      ctx.moveTo(cx, p.y + 22);
+      ctx.lineTo(cx + armOffset, p.y + 30);
+      ctx.moveTo(cx, p.y + 22);
+      ctx.lineTo(cx - armOffset, p.y + 30);
+      ctx.stroke();
+    }
+
+    // 腿
+    if (isJumping) {
+      // 跳跃时腿收起
+      ctx.beginPath();
+      ctx.moveTo(cx, p.y + 35);
+      ctx.lineTo(cx - 6, p.y + 45);
+      ctx.moveTo(cx, p.y + 35);
+      ctx.lineTo(cx + 6, p.y + 45);
+      ctx.stroke();
+    } else {
+      // 跑步迈腿
+      const legOffset = p.frame === 0 ? 10 : -10;
+      ctx.beginPath();
+      ctx.moveTo(cx, p.y + 35);
+      ctx.lineTo(cx + legOffset, p.y + 50);
+      ctx.moveTo(cx, p.y + 35);
+      ctx.lineTo(cx - legOffset, p.y + 50);
+      ctx.stroke();
+    }
+  }
+
+  endGame(hitObstacle) {
+    this.gameOver = true;
+    this.running = false;
+    if (this.animFrame) cancelAnimationFrame(this.animFrame);
+    if (this.timer) clearInterval(this.timer);
+
+    const survived = this.survivalTime;
+    let finalScore;
+    if (survived >= 15) finalScore = 3;
+    else if (survived >= 8) finalScore = 2;
+    else finalScore = 1;
+
+    if (hitObstacle) {
+      // 碰撞闪烁效果
+      this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+      this.ctx.fillRect(0, 0, this.width, this.height);
+    }
+
+    setTimeout(() => this.showResult(finalScore, survived, hitObstacle), 500);
+  }
+
+  showResult(finalScore, survived, hitObstacle) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; z-index: 100;
+    `;
+
+    const labels = ['', '加班奴隶', '摸鱼学徒', '逃离大师'];
+    const reason = hitObstacle ? '被工作追上了...' : '成功逃离20秒！';
+    overlay.innerHTML = `
+      <div style="background: #2c2c3a; border: 1px solid #555; border-radius: 16px; padding: 30px 40px; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 10px;">🏃</div>
+        <div style="font-size: 18px; color: #aaa; margin-bottom: 5px;">${reason}</div>
+        <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 8px;">
+          存活 ${survived} 秒
+        </div>
+        <div style="font-size: 16px; color: #aaa; margin-bottom: 20px;">${labels[finalScore]}</div>
+        <button id="run-continue-btn" style="
+          padding: 12px 40px; font-size: 16px; border: none;
+          background: #28a745; color: white; border-radius: 25px; cursor: pointer;
+        ">继续</button>
+      </div>
+    `;
+
+    this.container.appendChild(overlay);
+
+    const btn = document.getElementById('run-continue-btn');
+    btn.addEventListener('click', () => {
+      if (this.onComplete) this.onComplete(finalScore);
+    });
+    btn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      if (this.onComplete) this.onComplete(finalScore);
+    });
+  }
+
+  destroy() {
+    this.running = false;
+    this.gameOver = true;
+    if (this.animFrame) cancelAnimationFrame(this.animFrame);
+    if (this.timer) clearInterval(this.timer);
+    if (this.canvas) {
+      this.canvas.removeEventListener('touchstart', this.handleJump);
+      this.canvas.removeEventListener('mousedown', this.handleJump);
+    }
+    document.removeEventListener('keydown', this.handleKey);
+  }
+}
+
+// ============================================================
+// 导出
+// ============================================================
+window.MiniGameManager = MiniGameManager;
+
+
+// ============ 初始化 ============
+game.eventSystem = new EventSystem();
+
+// 小游戏管理器实例化
+const miniGameContainer = document.getElementById('minigame-container');
+const miniGameMgr = new MiniGameManager(miniGameContainer);
+
+// 覆盖 GameEngine 的 triggerMiniGame
+GameEngine.prototype.triggerMiniGame = function(type) {
+  ScreenManager.transition('game', 'miniGame', () => {
+    miniGameMgr.onComplete = (gameType, score) => {
+      miniGameMgr.stop();
+      this.onMiniGameEnd(gameType, score);
+    };
+    miniGameMgr.start(type);
+  });
+};
+
+// 覆盖 onMiniGameEnd
+GameEngine.prototype.onMiniGameEnd = function(type, score) {
+  this.state.miniGameScores[type] = Math.max(this.state.miniGameScores[type] || 0, score);
+  const bonusMap = { 3: {fishing: 5, happy: 5}, 2: {fishing: 3, happy: 3}, 1: {happy: 2} };
+  this.state.modifyStats(bonusMap[score] || {});
+  ScreenManager.transition('miniGame', 'game', () => this.afterEvent());
+};
+
+// 覆盖 renderEvent 让选择正确触发
+GameEngine.prototype.renderEvent = function(event) {
+  const container = document.getElementById('event-container');
+  if (!container) return;
+  const periodNames = { morning: '上午', noon: '午休', afternoon: '下午', overtime: '加班', evening: '19:50 晚高峰', midnight: '23:50 倒计时' };
+  const cal = this.state.getCalendar();
+
+  const fixText = (text) => {
+    const playerName = this.state.playerName;
+    const partnerName = playerName === '余默' ? '俞闲' : '余默';
+    return text.replace(new RegExp(playerName, 'g'), '你').replace(new RegExp(partnerName, 'g'), partnerName);
+  };
+
+  const eventText = fixText(event.text);
+  const choicesHtml = event.choices.map((c, i) => {
+    const choiceText = fixText(c.text);
+    return `<button class="choice-btn" data-idx="${i}">${choiceText}</button>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="event-title">${periodNames[this.state.period] || ''} · ${cal.date} ${cal.weekday}</div>
+    <div class="event-text">${eventText}</div>
+    <div class="event-choices">${choicesHtml}</div>
+  `;
+  container.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      game.handleChoice(idx);
+    });
+  });
+};
+
+// 覆盖 render
+GameEngine.prototype.render = function() {
+  this.renderStatusBar();
+  if (this.state.currentEventId && this.eventSystem) {
+    const event = this.eventSystem.getEventById(this.state.currentEventId);
+    if (event) {
+      this.renderEvent(event);
+      return;
+    }
+  }
+  this.renderDefaultChoices();
+};
+
+// 覆盖 renderDefaultChoices 绑定事件
+GameEngine.prototype.renderDefaultChoices = function() {
+  const container = document.getElementById('event-container');
+  if (!container) return;
+  const isWeekend = this.state.isWeekend();
+  const cal = this.state.getCalendar();
+
+  const workdayActions = {
+    morning: [
+      { text: '认真写代码', effect: { performance: 8, happy: -3, fishing: -5 } },
+      { text: '摸鱼刷手机', effect: { fishing: 8, happy: 5, performance: -5 } },
+      { text: '和同事闲聊', effect: { social: 6, happy: 3, performance: -3 } }
+    ],
+    noon: [
+      { text: '午休睡觉', effect: { happy: 5, fishing: 3 } },
+      { text: '学习新技术', effect: { performance: 5, happy: -2 } },
+      { text: '和同事聚餐', effect: { social: 5, happy: 3, fishing: 2 } }
+    ],
+    afternoon: [
+      { text: '专注开发需求', effect: { performance: 10, happy: -5, fishing: -5 } },
+      { text: '带薪上厕所', effect: { fishing: 5, happy: 3, performance: -2 } },
+      { text: '帮同事解bug', effect: { social: 5, performance: 3, happy: -2 } }
+    ],
+    overtime: [
+      { text: '主动加班', effect: { performance: 10, happy: -8, fishing: -5 } },
+      { text: '准时下班', effect: { happy: 8, fishing: 5, performance: -3 } },
+      { text: '假装加班实则摸鱼', effect: { fishing: 10, happy: 3, performance: -1 } }
+    ]
+  };
+
+  const weekendActions = {
+    morning: [
+      { text: '睡到自然醒', effect: { happy: 8, fishing: 5, performance: -2 } },
+      { text: '早起学习充电', effect: { performance: 6, happy: -2, fishing: -5 } },
+      { text: '赖床刷短视频', effect: { fishing: 6, happy: 6, performance: -3 } }
+    ],
+    noon: [
+      { text: '点外卖宅家', effect: { happy: 5, fishing: 4 } },
+      { text: '出门吃好的犒劳自己', effect: { happy: 7, fishing: 3, social: 2 } },
+      { text: '约同事出去浪', effect: { social: 7, happy: 5, fishing: 2 } }
+    ],
+    afternoon: [
+      { text: '打游戏/追剧', effect: { happy: 8, fishing: 8, performance: -5 } },
+      { text: '主动去公司加班', effect: { performance: 10, happy: -6, fishing: -8 } },
+      { text: '出门逛街散心', effect: { happy: 6, social: 3, fishing: 3 } }
+    ]
+  };
+
+  const promoActions = {
+    evening: [
+      { text: '紧盯实时大盘', effect: { performance: 8, happy: -3, fishing: -5 } },
+      { text: '围观同事紧张的样子', effect: { fishing: 5, happy: 4, social: 3 } },
+      { text: '去茶水间拿零食补给', effect: { fishing: 3, happy: 5, performance: -2 } }
+    ],
+    midnight: [
+      { text: '全神贯注盯监控', effect: { performance: 10, happy: -5, fishing: -8 } },
+      { text: '和同事一起倒计时', effect: { social: 7, happy: 5, fishing: 2 } },
+      { text: '偷偷打瞌睡', effect: { fishing: 6, happy: 3, performance: -5 } }
+    ]
+  };
+
+  let actions;
+  if (cal.isPromo && promoActions[this.state.period]) {
+    actions = promoActions[this.state.period];
+  } else if (isWeekend) {
+    actions = weekendActions[this.state.period] || weekendActions.morning;
+  } else {
+    actions = workdayActions[this.state.period] || workdayActions.morning;
+  }
+
+  const periodNames = { morning: '上午', noon: '午休', afternoon: '下午', overtime: '加班时间', evening: '19:50 晚高峰', midnight: '23:50 倒计时' };
+  const locationText = (isWeekend && !cal.isPromo) ? '在家里，接下来做什么？' : '在工位上，接下来做什么？';
+
+  container.innerHTML = `
+    <div class="event-title">${periodNames[this.state.period]} · ${cal.date} ${cal.weekday}</div>
+    <div class="event-text">${this.state.playerName}${locationText}</div>
+    <div class="event-choices">
+      ${actions.map((a, i) => `
+        <button class="choice-btn" data-idx="${i}">${a.text}</button>
+      `).join('')}
+    </div>
+  `;
+  const self = this;
+  container.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      const effect = actions[idx].effect;
+      self.state.modifyStats(effect);
+      self.afterEvent();
+    });
+  });
+};
+
+// 覆盖 advanceToNextEvent 支持小游戏触发
+GameEngine.prototype.advanceToNextEvent = function() {
+  if (this.state.happy < 20 && !this.state.flags['emo_' + this.state.day]) {
+    this.state.flags['emo_' + this.state.day] = true;
+    this.triggerEmoEvent();
+    return;
+  }
+  if (Math.random() < 0.2) {
+    const re = this.eventSystem.getRandomEvent(this.state);
+    if (re) {
+      this.state.currentEventId = re.id;
+      this.render();
+      return;
+    }
+  }
+  const event = this.eventSystem.getEvent(this.state);
+  if (event) {
+    this.state.currentEventId = event.id;
+    if (event.triggerMiniGame) {
+      this.state.eventsCompleted.push(event.id);
+      this.triggerMiniGame(event.triggerMiniGame);
+      return;
+    }
+  } else {
+    this.state.currentEventId = null;
+  }
+  this.render();
+};
+
+// 覆盖 handleChoice 支持 effects
+GameEngine.prototype.handleChoice = function(choiceIndex) {
+  const result = this.eventSystem.resolveChoice(this.state, choiceIndex);
+  if (result && result.statChanges) {
+    this.state.modifyStats(result.statChanges);
+  }
+  this.afterEvent();
+};
+
+// ============ UI 全局函数 ============
+function startNewGame() {
+  ScreenManager.transition('title', 'charSelect');
+}
+
+function showSaveLoad(mode) {
+  const from = document.querySelector('.screen-active')?.id?.replace('screen-', '') || 'title';
+  window._saveLoadFrom = from;
+  window._saveLoadMode = mode;
+  ScreenManager.transition(from, 'saveLoad');
+  renderSaveSlots(mode);
+}
+
+function closeSaveLoad() {
+  const from = window._saveLoadFrom || 'title';
+  ScreenManager.transition('saveLoad', from);
+}
+
+function renderSaveSlots(mode) {
+  const titleEl = document.getElementById('save-title');
+  const slotsEl = document.getElementById('save-slots');
+  const info = SaveSystem.getSlotInfo();
+  
+  titleEl.textContent = mode === 'load' ? '选择存档' : '存档管理';
+  
+  let html = '';
+  const slotNames = { 0: '槽位 1', 1: '槽位 2', 2: '槽位 3', auto: '自动存档' };
+  
+  for (const slot of ['auto', 0, 1, 2]) {
+    const data = info[slot];
+    if (data) {
+      const date = new Date(data.timestamp).toLocaleString('zh-CN');
+      html += `<button class="save-slot" onclick="handleSlotClick('${slot}', '${mode}')">
+        <strong>${slotNames[slot]}</strong><br>
+        <span style="font-size:0.8rem;color:#aaa;">Day ${data.day} · ${data.playerName} · ${date}</span>
+      </button>`;
+    } else {
+      html += `<button class="save-slot save-slot-empty" onclick="handleSlotClick('${slot}', '${mode}')">
+        <strong>${slotNames[slot]}</strong><br><span style="font-size:0.8rem;">空</span>
+      </button>`;
+    }
+  }
+  slotsEl.innerHTML = html;
+}
+
+function handleSlotClick(slot, mode) {
+  if (mode === 'load') {
+    if (game.loadGame(slot)) {
+      game.advanceToNextEvent();
+    } else {
+      alert('该槽位没有存档');
+    }
+  } else if (mode === 'save') {
+    SaveSystem.save(slot, game.state);
+    alert('存档成功');
+    closeSaveLoad();
+  }
+}
+
+function toggleGameMenu() {
+  document.getElementById('game-menu').classList.toggle('active');
+}
+
+function resumeGame() {
+  document.getElementById('game-menu').classList.remove('active');
+}
+
+function saveGame() {
+  document.getElementById('game-menu').classList.remove('active');
+  window._saveLoadFrom = 'game';
+  window._saveLoadMode = 'save';
+  ScreenManager.transition('game', 'saveLoad');
+  renderSaveSlots('save');
+}
+
+function backToTitleFromMenu() {
+  document.getElementById('game-menu').classList.remove('active');
+  ScreenManager.transition('game', 'title');
+}
+
+
+
+
+</script></body></html>
