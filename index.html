@@ -3484,49 +3484,40 @@ class RunGame {
     this.ctx = null;
     this.animFrame = null;
     this.timer = null;
-    this.timeLeft = 20;
+    this.timeLeft = 25;
     this.survivalTime = 0;
     this.running = false;
     this.gameOver = false;
+    this.gender = (window.game && window.game.state) ? window.game.state.gender : 'male';
 
-    // 物理参数
     this.gravity = 0.6;
-    this.jumpForce = -12;
+    this.jumpForce = -11;
     this.groundY = 0;
-    this.speed = 4;
-    this.maxSpeed = 8;
-    this.lastSpeedUp = 0;
+    this.speed = 3.5;
+    this.maxSpeed = 7;
 
-    // 角色
-    this.player = {
-      x: 60,
-      y: 0,
-      w: 30,
-      h: 50,
-      vy: 0,
-      onGround: true,
-      jumps: 0,
-      maxJumps: 2,
-      frame: 0,
-      frameTimer: 0
-    };
+    this.player = { x: 70, y: 0, w: 24, h: 32, vy: 0, onGround: true, jumps: 0, maxJumps: 2, frame: 0, frameTimer: 0 };
+    this.boss = { x: -60, y: 0, w: 28, h: 36, frame: 0, frameTimer: 0, speed: 0, catchUp: false };
 
-    // 障碍物
     this.obstacles = [];
     this.obstacleTimer = 0;
-    this.minSpawnInterval = 1200;
-
-    // 背景
+    this.minSpawnInterval = 1400;
     this.bgOffset = 0;
     this.floorOffset = 0;
+    this.stars = [];
 
-    // 障碍类型
     this.obstacleTypes = [
-      { emoji: '📄', label: '需求文档', type: 'low', w: 30, h: 35 },
-      { emoji: '📅', label: '会议邀请', type: 'high', w: 35, h: 55 },
-      { emoji: '💬', label: '"在吗"', type: 'air', w: 35, h: 30 },
-      { emoji: '📧', label: '全员邮件', type: 'double', w: 30, h: 35 }
+      { emoji: '📄', label: '需求文档', type: 'low', w: 24, h: 28 },
+      { emoji: '📅', label: '会议邀请', type: 'high', w: 28, h: 44 },
+      { emoji: '💬', label: '"在吗"', type: 'air', w: 28, h: 24 },
+      { emoji: '📧', label: '全员邮件', type: 'double', w: 24, h: 28 },
+      { emoji: '⏰', label: '加班通知', type: 'low', w: 24, h: 28 },
+      { emoji: '📊', label: 'PPT', type: 'high', w: 28, h: 44 }
     ];
+
+    for (let i = 0; i < 30; i++) {
+      this.stars.push({ x: Math.random() * 400, y: Math.random() * 200, size: 1 + Math.random() * 2, speed: 0.2 + Math.random() * 0.5 });
+    }
   }
 
   start() {
@@ -3534,23 +3525,18 @@ class RunGame {
     this.bindEvents();
     this.running = true;
     this.gameOver = false;
-    this.groundY = this.height - 80;
+    this.groundY = this.height - 60;
     this.player.y = this.groundY - this.player.h;
+    this.boss.y = this.groundY - this.boss.h;
     this.lastTime = performance.now();
-    this.startTime = performance.now();
-    this.lastSpeedUp = 0;
     this.startTimer();
     this.loop();
   }
 
   createCanvas() {
     this.canvas = document.createElement('canvas');
-    this.canvas.style.width = '100%';
-    this.canvas.style.height = '100%';
-    this.canvas.style.display = 'block';
-    this.canvas.style.touchAction = 'none';
+    this.canvas.style.cssText = 'width:100%;height:100%;display:block;touch-action:none;image-rendering:pixelated;';
     this.container.appendChild(this.canvas);
-
     const rect = this.container.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     this.width = rect.width;
@@ -3559,23 +3545,12 @@ class RunGame {
     this.canvas.height = this.height * dpr;
     this.ctx = this.canvas.getContext('2d');
     this.ctx.scale(dpr, dpr);
+    this.ctx.imageSmoothingEnabled = false;
   }
 
   bindEvents() {
-    this.handleJump = (e) => {
-      e.preventDefault();
-      if (!this.running || this.gameOver) return;
-      this.jump();
-    };
-
-    this.handleKey = (e) => {
-      if (e.code === 'Space' || e.key === ' ') {
-        e.preventDefault();
-        if (!this.running || this.gameOver) return;
-        this.jump();
-      }
-    };
-
+    this.handleJump = (e) => { e.preventDefault(); if (!this.running || this.gameOver) return; this.jump(); };
+    this.handleKey = (e) => { if (e.code === 'Space' || e.key === ' ') { e.preventDefault(); if (!this.running || this.gameOver) return; this.jump(); } };
     this.canvas.addEventListener('touchstart', this.handleJump, { passive: false });
     this.canvas.addEventListener('mousedown', this.handleJump);
     document.addEventListener('keydown', this.handleKey);
@@ -3593,334 +3568,329 @@ class RunGame {
     this.timer = setInterval(() => {
       this.timeLeft--;
       this.survivalTime++;
-
-      // 每5秒加速
-      if (this.survivalTime % 5 === 0 && this.speed < this.maxSpeed) {
-        this.speed += 0.8;
-      }
-
-      if (this.timeLeft <= 0) {
-        this.endGame(false);
-      }
+      if (this.survivalTime % 5 === 0 && this.speed < this.maxSpeed) this.speed += 0.6;
+      // 老板越来越近
+      this.boss.speed = Math.min(this.speed - 0.5, this.speed * (0.7 + this.survivalTime * 0.01));
+      if (this.timeLeft <= 0) this.endGame(false);
     }, 1000);
   }
 
   spawnObstacle() {
     const typeIdx = Math.floor(Math.random() * this.obstacleTypes.length);
     const type = this.obstacleTypes[typeIdx];
-
     if (type.type === 'double') {
-      // 双障碍
-      this.obstacles.push({
-        x: this.width + 10,
-        y: this.groundY - type.h,
-        w: type.w,
-        h: type.h,
-        emoji: type.emoji,
-        kind: 'low'
-      });
-      this.obstacles.push({
-        x: this.width + 60,
-        y: this.groundY - type.h,
-        w: type.w,
-        h: type.h,
-        emoji: type.emoji,
-        kind: 'low'
-      });
+      this.obstacles.push({ x: this.width + 10, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, kind: 'low' });
+      this.obstacles.push({ x: this.width + 50, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, kind: 'low' });
     } else if (type.type === 'air') {
-      // 空中障碍
-      this.obstacles.push({
-        x: this.width + 10,
-        y: this.groundY - 90 - type.h,
-        w: type.w,
-        h: type.h,
-        emoji: type.emoji,
-        kind: 'air'
-      });
+      this.obstacles.push({ x: this.width + 10, y: this.groundY - 70 - type.h, w: type.w, h: type.h, emoji: type.emoji, kind: 'air' });
     } else if (type.type === 'high') {
-      this.obstacles.push({
-        x: this.width + 10,
-        y: this.groundY - type.h,
-        w: type.w,
-        h: type.h,
-        emoji: type.emoji,
-        kind: 'high'
-      });
+      this.obstacles.push({ x: this.width + 10, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, kind: 'high' });
     } else {
-      this.obstacles.push({
-        x: this.width + 10,
-        y: this.groundY - type.h,
-        w: type.w,
-        h: type.h,
-        emoji: type.emoji,
-        kind: 'low'
-      });
+      this.obstacles.push({ x: this.width + 10, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, kind: 'low' });
     }
   }
 
   loop() {
     if (!this.running) return;
-
     const now = performance.now();
     const dt = now - this.lastTime;
     this.lastTime = now;
-
     this.update(dt);
     this.render();
-
     this.animFrame = requestAnimationFrame(() => this.loop());
   }
 
   update(dt) {
     if (this.gameOver) return;
-
-    // 玩家物理
+    // Player physics
     this.player.vy += this.gravity;
     this.player.y += this.player.vy;
-
     if (this.player.y >= this.groundY - this.player.h) {
       this.player.y = this.groundY - this.player.h;
       this.player.vy = 0;
       this.player.onGround = true;
       this.player.jumps = 0;
     }
-
-    // 跑步动画
     this.player.frameTimer += dt;
-    if (this.player.frameTimer > 150) {
-      this.player.frame = (this.player.frame + 1) % 2;
-      this.player.frameTimer = 0;
-    }
+    if (this.player.frameTimer > 120) { this.player.frame = (this.player.frame + 1) % 4; this.player.frameTimer = 0; }
 
-    // 障碍物生成
+    // Boss追赶
+    this.boss.frameTimer += dt;
+    if (this.boss.frameTimer > 150) { this.boss.frame = (this.boss.frame + 1) % 4; this.boss.frameTimer = 0; }
+    const targetBossX = this.player.x - 55 - (20 - this.survivalTime) * 1.5;
+    this.boss.x += (targetBossX - this.boss.x) * 0.02;
+    if (this.boss.x > this.player.x - 30) { this.endGame(true); return; }
+
+    // Obstacles
     this.obstacleTimer += dt;
-    const spawnInterval = Math.max(800, this.minSpawnInterval - this.survivalTime * 20);
-    if (this.obstacleTimer >= spawnInterval) {
-      this.spawnObstacle();
-      this.obstacleTimer = 0;
-    }
-
-    // 障碍物移动
+    const spawnInterval = Math.max(800, this.minSpawnInterval - this.survivalTime * 25);
+    if (this.obstacleTimer >= spawnInterval) { this.spawnObstacle(); this.obstacleTimer = 0; }
     for (let i = this.obstacles.length - 1; i >= 0; i--) {
       this.obstacles[i].x -= this.speed;
-      if (this.obstacles[i].x < -50) {
-        this.obstacles.splice(i, 1);
-      }
+      if (this.obstacles[i].x < -50) this.obstacles.splice(i, 1);
     }
-
-    // 碰撞检测
+    // Collision
     for (const obs of this.obstacles) {
-      if (this.checkCollision(this.player, obs)) {
-        this.endGame(true);
-        return;
-      }
+      if (this.checkCollision(this.player, obs)) { this.endGame(true); return; }
     }
-
-    // 背景滚动
-    this.bgOffset = (this.bgOffset + this.speed * 0.3) % 200;
-    this.floorOffset = (this.floorOffset + this.speed) % 40;
+    // BG
+    this.bgOffset = (this.bgOffset + this.speed * 0.3) % 120;
+    this.floorOffset = (this.floorOffset + this.speed) % 16;
+    for (const s of this.stars) { s.x -= s.speed; if (s.x < 0) s.x = this.width; }
   }
 
-  checkCollision(player, obs) {
-    const shrink = 5;
-    return (
-      player.x + shrink < obs.x + obs.w &&
-      player.x + player.w - shrink > obs.x &&
-      player.y + shrink < obs.y + obs.h &&
-      player.y + player.h - shrink > obs.y
-    );
+  checkCollision(p, obs) {
+    const s = 4;
+    return p.x + s < obs.x + obs.w && p.x + p.w - s > obs.x && p.y + s < obs.y + obs.h && p.y + p.h - s > obs.y;
   }
 
   render() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
 
-    // 背景（办公室色调）
-    ctx.fillStyle = '#2c2c3a';
+    // 像素风天空渐变
+    ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, this.width, this.height);
-
-    // 背景工位剪影
-    ctx.fillStyle = '#3a3a4a';
-    for (let i = 0; i < 5; i++) {
-      const x = ((i * 200) - this.bgOffset + 1000) % (this.width + 200) - 100;
-      // 工位
-      ctx.fillRect(x, this.groundY - 120, 80, 80);
-      ctx.fillRect(x + 10, this.groundY - 140, 60, 20);
-      // 显示器
-      ctx.fillRect(x + 25, this.groundY - 160, 30, 25);
-    }
-
-    // 地板
+    // 星星
     ctx.fillStyle = '#555';
+    for (const s of this.stars) { ctx.fillRect(Math.floor(s.x), Math.floor(s.y), s.size, s.size); }
+
+    // 背景建筑剪影（像素风）
+    ctx.fillStyle = '#252540';
+    for (let i = 0; i < 6; i++) {
+      const bx = ((i * 120) - this.bgOffset + 720) % (this.width + 120) - 60;
+      const bh = 40 + (i % 3) * 25;
+      ctx.fillRect(Math.floor(bx), this.groundY - bh, 50, bh);
+      ctx.fillRect(Math.floor(bx) + 10, this.groundY - bh - 15, 30, 15);
+      // 窗户
+      ctx.fillStyle = '#3a3a5a';
+      for (let wy = 0; wy < 3; wy++) {
+        for (let wx = 0; wx < 2; wx++) {
+          ctx.fillRect(Math.floor(bx) + 8 + wx * 20, this.groundY - bh + 8 + wy * 14, 6, 6);
+        }
+      }
+      ctx.fillStyle = '#252540';
+    }
+
+    // 地面（像素格子）
+    ctx.fillStyle = '#3d3d5c';
     ctx.fillRect(0, this.groundY, this.width, this.height - this.groundY);
-
-    // 地板格子
-    ctx.strokeStyle = '#666';
-    ctx.lineWidth = 1;
-    for (let x = -this.floorOffset; x < this.width; x += 40) {
-      ctx.beginPath();
-      ctx.moveTo(x, this.groundY);
-      ctx.lineTo(x, this.height);
-      ctx.stroke();
-    }
-    for (let y = this.groundY; y < this.height; y += 20) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.width, y);
-      ctx.stroke();
+    ctx.fillStyle = '#4a4a6a';
+    for (let x = -this.floorOffset; x < this.width; x += 16) {
+      for (let y = this.groundY; y < this.height; y += 16) {
+        if ((Math.floor(x / 16) + Math.floor(y / 16)) % 2 === 0) ctx.fillRect(x, y, 16, 16);
+      }
     }
 
-    // 角色（火柴人）
+    // 老板（像素风）
+    this.drawBoss(ctx);
+    // 玩家
     this.drawPlayer(ctx);
-
     // 障碍物
     for (const obs of this.obstacles) {
-      ctx.font = obs.w + 'px serif';
+      ctx.font = (obs.w - 4) + 'px serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
       ctx.fillText(obs.emoji, obs.x + obs.w / 2, obs.y + obs.h);
     }
 
     // HUD
-    ctx.fillStyle = 'rgba(0,0,0,0.7)';
-    ctx.fillRect(0, 0, this.width, 50);
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(0, 0, this.width, 44);
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 16px sans-serif';
+    ctx.font = 'bold 14px monospace';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText('⏱ ' + this.timeLeft + 's', 15, 25);
+    ctx.fillText('⏱ ' + this.timeLeft + 's', 12, 22);
     ctx.textAlign = 'center';
-    ctx.fillText('存活 ' + this.survivalTime + '秒', this.width / 2, 25);
+    ctx.fillText('🏃 ' + this.survivalTime + '秒', this.width / 2, 22);
     ctx.textAlign = 'right';
-    const speedPercent = Math.round((this.speed / this.maxSpeed) * 100);
-    ctx.fillText('速度 ' + speedPercent + '%', this.width - 15, 25);
+    // 老板距离指示
+    const dist = Math.max(0, Math.floor(this.player.x - this.boss.x - 30));
+    const distColor = dist < 20 ? '#ff4757' : dist < 40 ? '#ffa502' : '#2ed573';
+    ctx.fillStyle = distColor;
+    ctx.fillText('老板距离: ' + dist + 'px', this.width - 12, 22);
 
-    // 底部提示
     if (this.survivalTime < 3) {
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.font = '14px sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = '12px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('点击屏幕跳跃，可以二段跳！', this.width / 2, this.height - 20);
+      ctx.fillText('点击屏幕跳跃 | 可二段跳 | 别被老板追上！', this.width / 2, this.height - 14);
     }
   }
 
   drawPlayer(ctx) {
     const p = this.player;
-    const cx = p.x + p.w / 2;
+    const x = Math.floor(p.x);
+    const y = Math.floor(p.y);
+    const isMale = this.gender === 'male';
     const isJumping = !p.onGround;
-
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
+    const f = p.frame;
 
     // 头
-    ctx.beginPath();
-    ctx.arc(cx, p.y + 10, 8, 0, Math.PI * 2);
-    ctx.stroke();
-
+    ctx.fillStyle = '#ffd5a0';
+    ctx.fillRect(x + 8, y, 8, 8);
+    // 头发
+    ctx.fillStyle = isMale ? '#4a3728' : '#2d1b0e';
+    ctx.fillRect(x + 8, y - 2, 8, 3);
+    if (!isMale) { ctx.fillRect(x + 6, y, 2, 6); ctx.fillRect(x + 16, y, 2, 6); }
+    // 眼
+    ctx.fillStyle = '#333';
+    ctx.fillRect(x + 10, y + 3, 2, 2);
+    ctx.fillRect(x + 14, y + 3, 2, 2);
     // 身体
-    ctx.beginPath();
-    ctx.moveTo(cx, p.y + 18);
-    ctx.lineTo(cx, p.y + 35);
-    ctx.stroke();
-
+    ctx.fillStyle = isMale ? '#4a90d9' : '#ff6b81';
+    ctx.fillRect(x + 6, y + 8, 12, 12);
     // 手臂
+    ctx.fillStyle = '#ffd5a0';
     if (isJumping) {
-      // 跳跃时手臂向上
-      ctx.beginPath();
-      ctx.moveTo(cx, p.y + 22);
-      ctx.lineTo(cx - 10, p.y + 15);
-      ctx.moveTo(cx, p.y + 22);
-      ctx.lineTo(cx + 10, p.y + 15);
-      ctx.stroke();
+      ctx.fillRect(x + 4, y + 6, 4, 3);
+      ctx.fillRect(x + 16, y + 6, 4, 3);
     } else {
-      // 跑步摆臂
-      const armOffset = p.frame === 0 ? 8 : -8;
-      ctx.beginPath();
-      ctx.moveTo(cx, p.y + 22);
-      ctx.lineTo(cx + armOffset, p.y + 30);
-      ctx.moveTo(cx, p.y + 22);
-      ctx.lineTo(cx - armOffset, p.y + 30);
-      ctx.stroke();
+      const armOff = (f % 2 === 0) ? 2 : -2;
+      ctx.fillRect(x + 4, y + 9 + armOff, 3, 6);
+      ctx.fillRect(x + 17, y + 9 - armOff, 3, 6);
     }
-
+    // 裤子
+    ctx.fillStyle = isMale ? '#2c3e50' : '#2c3e50';
+    ctx.fillRect(x + 6, y + 20, 12, 6);
     // 腿
+    ctx.fillStyle = isMale ? '#2c3e50' : '#ffd5a0';
     if (isJumping) {
-      // 跳跃时腿收起
-      ctx.beginPath();
-      ctx.moveTo(cx, p.y + 35);
-      ctx.lineTo(cx - 6, p.y + 45);
-      ctx.moveTo(cx, p.y + 35);
-      ctx.lineTo(cx + 6, p.y + 45);
-      ctx.stroke();
+      ctx.fillRect(x + 7, y + 26, 4, 4);
+      ctx.fillRect(x + 13, y + 26, 4, 4);
     } else {
-      // 跑步迈腿
-      const legOffset = p.frame === 0 ? 10 : -10;
-      ctx.beginPath();
-      ctx.moveTo(cx, p.y + 35);
-      ctx.lineTo(cx + legOffset, p.y + 50);
-      ctx.moveTo(cx, p.y + 35);
-      ctx.lineTo(cx - legOffset, p.y + 50);
-      ctx.stroke();
+      const legOff = (f < 2) ? 3 : -3;
+      ctx.fillRect(x + 7, y + 26, 4, 4 + legOff);
+      ctx.fillRect(x + 13, y + 26, 4, 4 - legOff);
+    }
+    // 鞋
+    ctx.fillStyle = '#333';
+    const shoeY = isJumping ? y + 30 : y + 30 + ((f < 2) ? 2 : -2);
+    ctx.fillRect(x + 6, shoeY, 5, 2);
+    ctx.fillRect(x + 13, isJumping ? y + 30 : y + 30 - ((f < 2) ? 2 : -2), 5, 2);
+  }
+
+  drawBoss(ctx) {
+    const b = this.boss;
+    const x = Math.floor(b.x);
+    const y = Math.floor(b.y);
+    const f = b.frame;
+
+    // 头（更大）
+    ctx.fillStyle = '#ffd5a0';
+    ctx.fillRect(x + 8, y - 2, 12, 10);
+    // 头发（地中海）
+    ctx.fillStyle = '#333';
+    ctx.fillRect(x + 8, y - 4, 12, 3);
+    ctx.fillRect(x + 8, y - 2, 3, 4);
+    ctx.fillRect(x + 17, y - 2, 3, 4);
+    // 墨镜
+    ctx.fillStyle = '#111';
+    ctx.fillRect(x + 10, y + 2, 4, 3);
+    ctx.fillRect(x + 15, y + 2, 4, 3);
+    // 嘴（怒）
+    ctx.fillStyle = '#c0392b';
+    ctx.fillRect(x + 12, y + 6, 4, 2);
+    // 身体（西装）
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(x + 6, y + 10, 16, 14);
+    // 领带
+    ctx.fillStyle = '#c0392b';
+    ctx.fillRect(x + 13, y + 10, 3, 10);
+    // 手（追赶姿态）
+    ctx.fillStyle = '#ffd5a0';
+    const reach = (f % 2 === 0) ? 4 : 0;
+    ctx.fillRect(x + 22 + reach, y + 12, 5, 3);
+    ctx.fillRect(x + 22 + (4 - reach), y + 16, 5, 3);
+    // 腿
+    ctx.fillStyle = '#111';
+    const legOff = (f < 2) ? 3 : -3;
+    ctx.fillRect(x + 8, y + 24, 5, 6 + legOff);
+    ctx.fillRect(x + 15, y + 24, 5, 6 - legOff);
+    // 鞋
+    ctx.fillStyle = '#222';
+    ctx.fillRect(x + 7, y + 30 + legOff, 6, 3);
+    ctx.fillRect(x + 14, y + 30 - legOff, 6, 3);
+
+    // 追赶怒气特效
+    if (this.survivalTime > 10) {
+      ctx.fillStyle = '#ff4757';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      const angryText = ['💢', '‼️', '🔥'][f % 3];
+      ctx.fillText(angryText, x + 14, y - 8);
     }
   }
 
-  endGame(hitObstacle) {
+  endGame(caught) {
     this.gameOver = true;
     this.running = false;
     if (this.animFrame) cancelAnimationFrame(this.animFrame);
     if (this.timer) clearInterval(this.timer);
 
-    const survived = this.survivalTime;
-    let finalScore;
-    if (survived >= 15) finalScore = 3;
-    else if (survived >= 8) finalScore = 2;
-    else finalScore = 1;
-
-    if (hitObstacle) {
-      // 碰撞闪烁效果
-      this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-      this.ctx.fillRect(0, 0, this.width, this.height);
+    if (caught) {
+      // 被追上/撞障碍的失败动画
+      this.showCaughtAnimation(() => {
+        const survived = this.survivalTime;
+        let finalScore;
+        if (survived >= 18) finalScore = 3;
+        else if (survived >= 10) finalScore = 2;
+        else finalScore = 1;
+        this.showResult(finalScore, survived, true);
+      });
+    } else {
+      this.showResult(3, this.survivalTime, false);
     }
-
-    setTimeout(() => this.showResult(finalScore, survived, hitObstacle), 500);
   }
 
-  showResult(finalScore, survived, hitObstacle) {
+  showCaughtAnimation(callback) {
+    const ctx = this.ctx;
+    // 闪红 + 显示失败图
+    let flash = 0;
+    const flashInterval = setInterval(() => {
+      ctx.fillStyle = flash % 2 === 0 ? 'rgba(255, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0)';
+      ctx.fillRect(0, 0, this.width, this.height);
+      flash++;
+      if (flash >= 4) {
+        clearInterval(flashInterval);
+        // 画失败场景
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0, 0, this.width, this.height);
+        ctx.fillStyle = '#ff4757';
+        ctx.font = 'bold 28px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('摸鱼失败！', this.width / 2, this.height / 2 - 40);
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px monospace';
+        ctx.fillText('被老板逮个正着...', this.width / 2, this.height / 2);
+        // 像素风老板大脸
+        ctx.font = '60px serif';
+        ctx.fillText('👔💢', this.width / 2, this.height / 2 + 60);
+        setTimeout(callback, 1200);
+      }
+    }, 100);
+  }
+
+  showResult(finalScore, survived, caught) {
     const overlay = document.createElement('div');
-    overlay.style.cssText = `
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
-      align-items: center; justify-content: center; z-index: 100;
-    `;
-
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;';
     const labels = ['', '加班奴隶', '摸鱼学徒', '逃离大师'];
-    const reason = hitObstacle ? '被工作追上了...' : '成功逃离20秒！';
-    overlay.innerHTML = `
-      <div style="background: #2c2c3a; border: 1px solid #555; border-radius: 16px; padding: 30px 40px; text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 10px;">🏃</div>
-        <div style="font-size: 18px; color: #aaa; margin-bottom: 5px;">${reason}</div>
-        <div style="font-size: 22px; font-weight: bold; color: white; margin-bottom: 8px;">
-          存活 ${survived} 秒
-        </div>
-        <div style="font-size: 16px; color: #aaa; margin-bottom: 20px;">${labels[finalScore]}</div>
-        <button id="run-continue-btn" style="
-          padding: 12px 40px; font-size: 16px; border: none;
-          background: #28a745; color: white; border-radius: 25px; cursor: pointer;
-        ">继续</button>
-      </div>
-    `;
-
-    this.container.appendChild(overlay);
-
-    const btn = document.getElementById('run-continue-btn');
-    btn.addEventListener('click', () => {
-      if (this.onComplete) this.onComplete(finalScore);
-    });
-    btn.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      if (this.onComplete) this.onComplete(finalScore);
-    });
+    const reason = caught ? '被老板追上了...' : '成功甩掉老板！自由了！';
+    const emoji = caught ? '😵' : '🎉';
+    overlay.innerHTML = `<div style="background:#1a1a2e;border:1px solid #555;border-radius:16px;padding:30px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:10px;">${emoji}</div>
+      <div style="font-size:16px;color:#aaa;margin-bottom:5px;">${reason}</div>
+      <div style="font-size:22px;font-weight:bold;color:white;margin-bottom:8px;">存活 ${survived} 秒</div>
+      <div style="font-size:16px;color:#aaa;margin-bottom:20px;">${labels[finalScore]}</div>
+      <button style="padding:12px 40px;font-size:16px;border:none;background:#28a745;color:white;border-radius:25px;cursor:pointer;">继续</button>
+    </div>`;
+    document.body.appendChild(overlay);
+    const btn = overlay.querySelector('button');
+    const complete = () => { overlay.remove(); if (this.onComplete) this.onComplete(finalScore); };
+    btn.addEventListener('click', complete);
+    btn.addEventListener('touchend', (e) => { e.preventDefault(); complete(); });
   }
 
   destroy() {
@@ -3928,13 +3898,11 @@ class RunGame {
     this.gameOver = true;
     if (this.animFrame) cancelAnimationFrame(this.animFrame);
     if (this.timer) clearInterval(this.timer);
-    if (this.canvas) {
-      this.canvas.removeEventListener('touchstart', this.handleJump);
-      this.canvas.removeEventListener('mousedown', this.handleJump);
-    }
+    if (this.canvas) { this.canvas.removeEventListener('touchstart', this.handleJump); this.canvas.removeEventListener('mousedown', this.handleJump); }
     document.removeEventListener('keydown', this.handleKey);
   }
 }
+
 
 // ============================================================
 // 导出
