@@ -1942,10 +1942,10 @@ class GameState {
     this.period = 'morning';
     this.gender = null;
     this.playerName = '';
-    this.fishing = 50;
-    this.performance = 50;
-    this.happy = 50;
-    this.social = 50;
+    this.fishing = 30;
+    this.performance = 40;
+    this.happy = 40;
+    this.social = 20;
     this.flags = {};
     this.miniGameScores = { bubble: 0, decode: 0, run: 0 };
     this.currentEventId = null;
@@ -2165,53 +2165,102 @@ class ScreenManager {
 const ENDINGS = {
   fishingGod: {
     title: '摸鱼之神',
-    description: '你在30天内成功修炼成摸鱼高手，工作任务也没落下。老板以为你是天才，同事们只知道你效率奇高——殊不知你把摸鱼玩成了艺术。',
+    description: '你在30天内把摸鱼修炼成了一门艺术。老板以为你效率奇高，殊不知你大部分时间都在带薪做自己。传说你的工位下面藏着一根鱼竿。',
     emoji: '🐟'
   },
   workaholic: {
     title: '卷王转正',
-    description: '你以惊人的绩效获得了转正名额。代价是30天没摸过一次鱼，同事们在背后叫你"卷王"。但offer到手，一切值得...吗？',
+    description: '你以惊人的绩效获得了转正名额。代价是30天没看过一次日落，同事们在背后叫你"人形打印机"。但offer到手，值不值只有你知道。',
     emoji: '👔'
   },
   socialKing: {
     title: '职场社牛',
-    description: '你认识了公司上上下下所有人，连CEO都知道你的名字。虽然代码没写几行，但你的人脉值已经拉满。有人说你迟早当CEO。',
+    description: '你认识了公司上上下下所有人，连保洁阿姨都叫你"小甜嘴"。代码没写几行，但茶水间的八卦没有你不知道的。有人预测你10年内当上VP。',
     emoji: '🤝'
   },
   happySlacker: {
     title: '快乐摆烂',
-    description: '你度过了最快乐的30天实习。每天准时下班，午休打游戏，茶水间聊八卦。虽然没学到什么，但你的精神状态全公司最好。',
+    description: '你度过了精神状态最好的30天。准时下班、午休打游戏、茶水间唠嗑——别人焦虑脱发，你容光焕发。虽然没学到什么，但你活成了所有打工人的梦想。',
     emoji: '😎'
   },
   balanced: {
     title: '中庸之道',
-    description: '你既没有太摸鱼也没有太卷，既不是社牛也不是社恐。实习评价上写着"表现中规中矩"。也许这就是成年人的智慧。',
+    description: '不卷不躺，不社恐不社牛。实习鉴定表上写着"该同学表现中规中矩"。听起来无聊？不，这是真正的生存智慧。',
     emoji: '⚖️'
   },
   fired: {
     title: '光速毕业',
-    description: '你的绩效降到了零，HR微笑着递给你一份"提前结束实习"的通知。收拾工位的时候，你觉得这30天过得像30秒。',
+    description: 'HR微笑着递来一份"提前结束实习"的通知。你收拾工位的时候，保安已经在旁边等了。30天的实习，体验了一把秒辞的快感。',
     emoji: '📦'
   },
   hidden: {
     title: '完美摸鱼',
-    description: '你找到了工作与生活的终极平衡——既会摸鱼，又广交朋友，还保持着好心情。这是传说中的"摸鱼三连"成就，只有真正的高手才能达成。',
+    description: '摸鱼、社交、快乐三项拉满，绩效还没垮——传说中的"摸鱼三连"成就。你找到了工作与生活的终极平衡点，是所有实习生的终极形态。',
     emoji: '🏆'
+  },
+  emoKing: {
+    title: 'emo王者',
+    description: '实习30天，快乐值跌到了谷底。你每天的状态就是：工位发呆→厕所深呼吸→天台吹风→循环。同事们私下讨论要不要给你买杯奶茶续命。',
+    emoji: '🥀'
+  },
+  invisibleMan: {
+    title: '透明人实习生',
+    description: '30天过去了，导师想不起你的名字，同事以为你早就离职了。你把"降低存在感"修炼到了极致——HR甚至差点忘了给你发离职证明。',
+    emoji: '👻'
+  },
+  firefighter: {
+    title: '救火队长',
+    description: '你的实习全在救火——修bug、赶deadline、扛需求变更。没人记得你写了什么代码，但所有人都记得你是那个"紧急的时候能顶上的"。实习评价：能抗压。',
+    emoji: '🧯'
+  },
+  slackMaster: {
+    title: '摸鱼不及格',
+    description: '你想摸鱼但摸不明白，想卷又卷不动。摸鱼的时候心虚，干活的时候摸鱼，两头都没做好。这大概就是"薛定谔的摸鱼"——不观测时你既在摸又没在摸。',
+    emoji: '🫠'
+  },
+  sixEightHero: {
+    title: '618战神',
+    description: '你在618大促中扛住了峰值，零故障零告警。战报里虽然没写你的名字，但导师在群里发了一句"感谢所有人"——你知道那个"所有人"里有你。',
+    emoji: '⚡'
   }
 };
 
 function calculateEnding(state) {
   if (state.performance <= 0) return ENDINGS.fired;
-  if (state.fishing >= 70 && state.social >= 70 && state.happy >= 70) return ENDINGS.hidden;
-  if (state.fishing >= 85 && state.performance >= 30) return ENDINGS.fishingGod;
+
+  // 隐藏结局：三项全优
+  if (state.fishing >= 75 && state.social >= 70 && state.happy >= 75 && state.performance >= 30) return ENDINGS.hidden;
+
+  // 618战神：绩效高+摸鱼低（说明大促期间认真扛了）
+  if (state.performance >= 80 && state.fishing <= 35) return ENDINGS.sixEightHero;
+
+  // 极端单项结局
+  if (state.fishing >= 85 && state.performance >= 25) return ENDINGS.fishingGod;
   if (state.performance >= 85) return ENDINGS.workaholic;
-  if (state.social >= 85) return ENDINGS.socialKing;
+  if (state.social >= 80) return ENDINGS.socialKing;
   if (state.happy >= 85) return ENDINGS.happySlacker;
+
+  // emo王者：快乐极低
+  if (state.happy <= 15) return ENDINGS.emoKing;
+
+  // 透明人：社交极低且摸鱼中等
+  if (state.social <= 15 && state.fishing >= 40 && state.fishing <= 65) return ENDINGS.invisibleMan;
+
+  // 救火队长：绩效较高但快乐低（一直在扛活但不开心）
+  if (state.performance >= 65 && state.happy <= 30) return ENDINGS.firefighter;
+
+  // 摸鱼不及格：四项都在中间偏下（什么都没做好）
+  if (state.fishing >= 35 && state.fishing <= 55 &&
+      state.performance >= 25 && state.performance <= 50 &&
+      state.happy >= 25 && state.happy <= 50 &&
+      state.social >= 20 && state.social <= 45) return ENDINGS.slackMaster;
+
+  // 中庸之道：四项都在合理范围
   const allBalanced = ['fishing', 'performance', 'happy', 'social'].every(
-    s => state[s] >= 35 && state[s] <= 65
+    s => state[s] >= 30 && state[s] <= 70
   );
   if (allBalanced) return ENDINGS.balanced;
-  // 默认结局
+
   return ENDINGS.balanced;
 }
 
