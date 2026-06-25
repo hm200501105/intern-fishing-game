@@ -2435,6 +2435,8 @@ class GameEngine {
     ScreenManager.transition('game', 'ending');
     const el = document.getElementById('screen-ending');
     if (el) {
+      const shareText = `我在「实习生存指南」中获得了【${ending.title}】结局！摸鱼${this.state.fishing}/绩效${this.state.performance}/快乐${this.state.happy}/人脉${this.state.social}，你也来试试？`;
+      const shareUrl = window.location.href;
       el.innerHTML = `
         <div class="ending-container">
           <div class="ending-emoji">${ending.emoji}</div>
@@ -2446,9 +2448,28 @@ class GameEngine {
             <span>😊 快乐: ${this.state.happy}</span>
             <span>🤝 人脉: ${this.state.social}</span>
           </div>
-          <button class="btn" onclick="game.backToTitle()">返回标题</button>
+          <button class="btn btn-primary" onclick="game.shareEnding()">分享结局给同事</button>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="game.backToTitle()">返回标题</button>
         </div>
       `;
+      this._shareText = shareText;
+      this._shareUrl = shareUrl;
+    }
+  }
+
+  shareEnding() {
+    const text = this._shareText || '来玩「实习生存指南」，测测你的实习结局！';
+    const url = this._shareUrl || window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: '实习生存指南', text: text, url: url }).catch(() => {});
+    } else {
+      const copyText = text + ' ' + url;
+      navigator.clipboard.writeText(copyText).then(() => {
+        const btn = document.querySelector('.ending-container .btn-primary');
+        if (btn) { btn.textContent = '已复制到剪贴板！'; setTimeout(() => { btn.textContent = '分享结局给同事'; }, 2000); }
+      }).catch(() => {
+        prompt('复制以下内容分享：', text + ' ' + url);
+      });
     }
   }
 
@@ -2733,8 +2754,8 @@ class BubbleGame {
 
     const rect = this.container.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    this.width = rect.width;
-    this.height = rect.height;
+    this.width = rect.width || window.innerWidth;
+    this.height = rect.height || window.innerHeight;
     this.canvas.width = this.width * dpr;
     this.canvas.height = this.height * dpr;
     this.ctx = this.canvas.getContext('2d');
@@ -3526,8 +3547,8 @@ class RunGame {
     this.container.appendChild(this.canvas);
     const rect = this.container.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    this.width = rect.width;
-    this.height = rect.height;
+    this.width = rect.width || window.innerWidth;
+    this.height = rect.height || window.innerHeight;
     this.canvas.width = this.width * dpr;
     this.canvas.height = this.height * dpr;
     this.ctx = this.canvas.getContext('2d');
