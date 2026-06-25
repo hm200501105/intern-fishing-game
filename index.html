@@ -3515,12 +3515,12 @@ class RunGame {
     this.stars = [];
 
     this.obstacleTypes = [
-      { emoji: '📄', label: '需求文档', type: 'low', w: 24, h: 28 },
-      { emoji: '📅', label: '会议邀请', type: 'high', w: 28, h: 44 },
-      { emoji: '💬', label: '"在吗"', type: 'air', w: 28, h: 24 },
-      { emoji: '📧', label: '全员邮件', type: 'double', w: 24, h: 28 },
-      { emoji: '⏰', label: '加班通知', type: 'low', w: 24, h: 28 },
-      { emoji: '📊', label: 'PPT', type: 'high', w: 28, h: 44 }
+      { emoji: '📄', label: '需求文档', type: 'low', w: 30, h: 34 },
+      { emoji: '📅', label: '会议邀请', type: 'high', w: 32, h: 50 },
+      { emoji: '💬', label: '"在吗？"', type: 'air', w: 32, h: 30 },
+      { emoji: '📧', label: '全员邮件', type: 'double', w: 30, h: 34 },
+      { emoji: '⏰', label: '加班通知', type: 'low', w: 30, h: 34 },
+      { emoji: '📊', label: 'PPT汇报', type: 'high', w: 32, h: 50 }
     ];
 
     for (let i = 0; i < 30; i++) {
@@ -3587,14 +3587,14 @@ class RunGame {
     const typeIdx = Math.floor(Math.random() * this.obstacleTypes.length);
     const type = this.obstacleTypes[typeIdx];
     if (type.type === 'double') {
-      this.obstacles.push({ x: this.width + 10, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, kind: 'low' });
-      this.obstacles.push({ x: this.width + 50, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, kind: 'low' });
+      this.obstacles.push({ x: this.width + 10, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, label: type.label, kind: 'low' });
+      this.obstacles.push({ x: this.width + 50, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, label: type.label, kind: 'low' });
     } else if (type.type === 'air') {
-      this.obstacles.push({ x: this.width + 10, y: this.groundY - 70 - type.h, w: type.w, h: type.h, emoji: type.emoji, kind: 'air' });
+      this.obstacles.push({ x: this.width + 10, y: this.groundY - 70 - type.h, w: type.w, h: type.h, emoji: type.emoji, label: type.label, kind: 'air' });
     } else if (type.type === 'high') {
-      this.obstacles.push({ x: this.width + 10, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, kind: 'high' });
+      this.obstacles.push({ x: this.width + 10, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, label: type.label, kind: 'high' });
     } else {
-      this.obstacles.push({ x: this.width + 10, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, kind: 'low' });
+      this.obstacles.push({ x: this.width + 10, y: this.groundY - type.h, w: type.w, h: type.h, emoji: type.emoji, label: type.label, kind: 'low' });
     }
   }
 
@@ -3696,10 +3696,17 @@ class RunGame {
     this.drawPlayer(ctx);
     // 障碍物
     for (const obs of this.obstacles) {
-      ctx.font = (obs.w - 4) + 'px serif';
+      ctx.font = (obs.w) + 'px serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
-      ctx.fillText(obs.emoji, obs.x + obs.w / 2, obs.y + obs.h);
+      ctx.fillText(obs.emoji, obs.x + obs.w / 2, obs.y + obs.h - 10);
+      if (obs.label) {
+        ctx.font = 'bold 9px monospace';
+        ctx.fillStyle = '#fffa';
+        ctx.textBaseline = 'top';
+        ctx.fillText(obs.label, obs.x + obs.w / 2, obs.y + obs.h - 8);
+        ctx.fillStyle = '#fff';
+      }
     }
 
     // HUD
