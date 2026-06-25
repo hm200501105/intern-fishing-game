@@ -4218,12 +4218,16 @@ function backToTitleFromMenu() {
   if (mini && ['runner', 'bubble', 'decode'].includes(mini)) {
     document.getElementById('screen-title').style.display = 'none';
     document.getElementById('screen-miniGame').style.display = 'flex';
-    miniGameMgr.onComplete = (gameType, score) => {
-      miniGameMgr.stop();
-      document.getElementById('screen-miniGame').style.display = 'none';
-      document.getElementById('screen-title').style.display = 'flex';
-    };
-    miniGameMgr.start(mini);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        miniGameMgr.onComplete = (gameType, score) => {
+          miniGameMgr.stop();
+          document.getElementById('screen-miniGame').style.display = 'none';
+          document.getElementById('screen-title').style.display = 'flex';
+        };
+        miniGameMgr.start(mini);
+      });
+    });
   }
 })();
 
