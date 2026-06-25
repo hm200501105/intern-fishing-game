@@ -3498,14 +3498,14 @@ class RunGame {
     this.gameOver = false;
     this.gender = (window.game && window.game.state) ? window.game.state.gender : 'male';
 
-    this.gravity = 0.6;
-    this.jumpForce = -11;
+    this.gravity = 0.5;
+    this.jumpForce = -13;
     this.groundY = 0;
-    this.speed = 3.5;
-    this.maxSpeed = 7;
+    this.speed = 3;
+    this.maxSpeed = 6;
 
     this.player = { x: 70, y: 0, w: 24, h: 32, vy: 0, onGround: true, jumps: 0, maxJumps: 2, frame: 0, frameTimer: 0 };
-    this.boss = { x: -60, y: 0, w: 28, h: 36, frame: 0, frameTimer: 0, speed: 0, catchUp: false };
+    this.boss = { x: -80, y: 0, w: 28, h: 36, frame: 0, frameTimer: 0, speed: 0, catchUp: false };
 
     this.obstacles = [];
     this.obstacleTimer = 0;
@@ -3576,9 +3576,9 @@ class RunGame {
     this.timer = setInterval(() => {
       this.timeLeft--;
       this.survivalTime++;
-      if (this.survivalTime % 5 === 0 && this.speed < this.maxSpeed) this.speed += 0.6;
+      if (this.survivalTime % 5 === 0 && this.speed < this.maxSpeed) this.speed += 0.4;
       // 老板越来越近
-      this.boss.speed = Math.min(this.speed - 0.5, this.speed * (0.7 + this.survivalTime * 0.01));
+      this.boss.speed = Math.min(this.speed - 0.8, this.speed * (0.6 + this.survivalTime * 0.008));
       if (this.timeLeft <= 0) this.endGame(false);
     }, 1000);
   }
@@ -3625,9 +3625,9 @@ class RunGame {
     // Boss追赶
     this.boss.frameTimer += dt;
     if (this.boss.frameTimer > 150) { this.boss.frame = (this.boss.frame + 1) % 4; this.boss.frameTimer = 0; }
-    const targetBossX = this.player.x - 55 - (20 - this.survivalTime) * 1.5;
-    this.boss.x += (targetBossX - this.boss.x) * 0.02;
-    if (this.boss.x > this.player.x - 30) { this.endGame(true); return; }
+    const targetBossX = this.player.x - 70 - (25 - this.survivalTime) * 1.2;
+    this.boss.x += (targetBossX - this.boss.x) * 0.015;
+    if (this.boss.x > this.player.x - 25) { this.endGame(true); return; }
 
     // Obstacles
     this.obstacleTimer += dt;
